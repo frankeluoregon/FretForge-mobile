@@ -1,0 +1,318 @@
+/* Base Layout & Reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #111;
+    color: #eee;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #f4a460;
+}
+
+h2 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+.mockup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+    gap: 40px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.theme-container {
+    background: var(--bg-app);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #333;
+}
+
+/* 
+   ========================================
+   FRETBOARD STRUCTURAL CSS 
+   (Adapted from styles.css to use variables)
+   ========================================
+*/
+
+.fretboard-grid {
+    display: grid;
+    /* Default columns, overridden by JS usually, but we set a default here */
+    grid-template-columns: 60px repeat(13, 1fr); 
+    background: var(--bg-fretboard);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.string-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--text-color);
+    font-size: 1.1em;
+    padding: 10px;
+}
+
+.fret-cell {
+    position: relative;
+    height: 60px;
+    border-right: 3px solid var(--fret-wire);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fret-cell::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2px;
+    background: var(--string-color);
+    z-index: 0;
+}
+
+.fret-cell:first-of-type {
+    border-left: 5px solid var(--fret-wire);
+}
+
+.fret-cell.fret-0 {
+    background: var(--nut-bg);
+    border-left: 5px solid var(--fret-wire);
+    border-right: 3px solid var(--fret-wire);
+}
+
+.fret-number {
+    position: absolute;
+    bottom: -35px;
+    font-size: 0.8em;
+    color: var(--text-dim);
+    font-weight: bold;
+}
+
+.fret-inlay {
+    position: absolute;
+    bottom: -50px;
+    width: 12px;
+    height: 12px;
+    background: var(--inlay-color);
+    border-radius: 50%;
+}
+
+/* Markers */
+.fret-marker {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9em;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.fret-marker .note-name { font-size: 1em; line-height: 1; }
+.fret-marker .interval { font-size: 0.7em; font-weight: normal; line-height: 1; }
+
+/* Root */
+.fret-marker.root {
+    background: var(--root-bg);
+    color: var(--root-text);
+    border: 3px solid var(--root-border);
+    border-radius: 4px; /* Square */
+}
+
+/* Chord Tone */
+.fret-marker.chord-tone:not(.root) {
+    background: var(--tone-bg);
+    color: var(--tone-text);
+    border: 3px solid var(--tone-border);
+    border-radius: 4px;
+}
+
+/* Scale Note */
+.fret-marker.scale-note {
+    background: var(--scale-bg);
+    color: var(--scale-text);
+    border: 2px solid var(--scale-border);
+    border-radius: 50%;
+}
+
+/* 
+   ========================================
+   THEME DEFINITIONS
+   ========================================
+*/
+
+/* 1. High Contrast */
+.theme-high-contrast {
+    --bg-app: #000000;
+    --bg-fretboard: #111111;
+    --border-dim: #ffffff;
+    --fret-wire: #ffffff;
+    --string-color: #ffffff;
+    --nut-bg: #333333;
+    --text-color: #ffffff;
+    --text-dim: #cccccc;
+    --inlay-color: #ffffff;
+
+    --root-bg: #ffffff;
+    --root-border: #ffffff;
+    --root-text: #000000;
+
+    --tone-bg: #ffff00;
+    --tone-border: #ffff00;
+    --tone-text: #000000;
+
+    --scale-bg: #000000;
+    --scale-border: #ffffff;
+    --scale-text: #ffffff;
+}
+
+/* 2. Light & Neutral */
+.theme-light {
+    --bg-app: #f4f4f4;
+    --bg-fretboard: #ffffff;
+    --border-dim: #cccccc;
+    --fret-wire: #666666;
+    --string-color: #999999;
+    --nut-bg: #e0e0e0;
+    --text-color: #333333;
+    --text-dim: #666666;
+    --inlay-color: #999999;
+
+    --root-bg: #333333;
+    --root-border: #000000;
+    --root-text: #ffffff;
+
+    --tone-bg: #e0e0e0;
+    --tone-border: #999999;
+    --tone-text: #000000;
+
+    --scale-bg: #ffffff;
+    --scale-border: #cccccc;
+    --scale-text: #999999;
+}
+.theme-light h2 { color: #333; }
+
+/* 3. Green (Nature) */
+.theme-green {
+    --bg-app: #0a1a0a;
+    --bg-fretboard: linear-gradient(to bottom, #1a2f1a, #0f1f0f);
+    --border-dim: #2d4d2d;
+    --fret-wire: #5c8a5c;
+    --string-color: rgba(144, 238, 144, 0.3);
+    --nut-bg: #2d4d2d;
+    --text-color: #90ee90;
+    --text-dim: #5c8a5c;
+    --inlay-color: #5c8a5c;
+
+    --root-bg: #228b22;
+    --root-border: #32cd32;
+    --root-text: #ffffff;
+
+    --tone-bg: #32cd32;
+    --tone-border: #228b22;
+    --tone-text: #003300;
+
+    --scale-bg: #1a2f1a;
+    --scale-border: #2d4d2d;
+    --scale-text: #5c8a5c;
+}
+
+/* 4. Blue (Ocean) */
+.theme-blue {
+    --bg-app: #050a14;
+    --bg-fretboard: linear-gradient(to bottom, #0d1b2a, #08101a);
+    --border-dim: #1b263b;
+    --fret-wire: #415a77;
+    --string-color: rgba(100, 200, 255, 0.3);
+    --nut-bg: #1b263b;
+    --text-color: #e0e1dd;
+    --text-dim: #778da9;
+    --inlay-color: #778da9;
+
+    --root-bg: #0077b6;
+    --root-border: #00b4d8;
+    --root-text: #ffffff;
+
+    --tone-bg: #48cae4;
+    --tone-border: #0077b6;
+    --tone-text: #03045e;
+
+    --scale-bg: #0d1b2a;
+    --scale-border: #415a77;
+    --scale-text: #778da9;
+}
+
+/* 5. Red (Heat) */
+.theme-red {
+    --bg-app: #1a0505;
+    --bg-fretboard: linear-gradient(to bottom, #2b0a0a, #1a0505);
+    --border-dim: #4a1515;
+    --fret-wire: #802020;
+    --string-color: rgba(255, 100, 100, 0.3);
+    --nut-bg: #4a1515;
+    --text-color: #ffcccc;
+    --text-dim: #cc6666;
+    --inlay-color: #cc6666;
+
+    --root-bg: #b30000;
+    --root-border: #ff3333;
+    --root-text: #ffffff;
+
+    --tone-bg: #ff6666;
+    --tone-border: #b30000;
+    --tone-text: #330000;
+
+    --scale-bg: #2b0a0a;
+    --scale-border: #4a1515;
+    --scale-text: #cc6666;
+}
+
+/* 6. Orange (Sunset - Complementary Blue Accents) */
+.theme-orange {
+    --bg-app: #1a1005;
+    --bg-fretboard: linear-gradient(to bottom, #3d240a, #291605);
+    --border-dim: #5c3a15;
+    --fret-wire: #8f5e26;
+    --string-color: rgba(255, 180, 100, 0.3);
+    --nut-bg: #5c3a15;
+    --text-color: #ffe0b5;
+    --text-dim: #c99865;
+    --inlay-color: #c99865;
+
+    /* Primary Orange */
+    --root-bg: #e67e22;
+    --root-border: #f39c12;
+    --root-text: #ffffff;
+
+    /* Complementary Blue Accent for Chord Tones */
+    --tone-bg: #3498db;
+    --tone-border: #2980b9;
+    --tone-text: #ffffff;
+
+    --scale-bg: #3d240a;
+    --scale-border: #5c3a15;
+    --scale-text: #c99865;
+}

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FretForge Theme Preview</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #111;
+            color: #eee;
+            padding: 20px;
+        }
+        h1 { text-align: center; color: #f4a460; margin-bottom: 30px; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        /* Preview Container Structure */
+        .theme-card {
+            border: 1px solid #444;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .theme-header {
+            padding: 10px;
+            font-weight: bold;
+            text-align: center;
+            background: #222;
+            border-bottom: 1px solid #444;
+        }
+        .preview-box {
+            padding: 20px;
+            flex: 1;
+            /* Theme Variables Applied Here */
+            background: var(--bg-app);
+            color: var(--text-main);
+        }
+
+        /* Mock UI Elements */
+        .mock-toolbar {
+            background: var(--bg-panel);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-dim);
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .mock-btn {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border: 1px solid var(--btn-border);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        .mock-input {
+            background: var(--bg-input);
+            border: 1px solid var(--border-dim);
+            color: var(--text-main);
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+        .mock-fretboard {
+            background: var(--bg-fretboard);
+            border: 1px solid var(--border-dim);
+            border-radius: 8px;
+            padding: 10px;
+            position: relative;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+        .mock-string {
+            position: absolute;
+            left: 0; right: 0; height: 1px;
+            background: var(--string-color);
+        }
+        .mock-fret {
+            width: 2px; height: 100%;
+            background: var(--fret-wire);
+            z-index: 1;
+        }
+        .mock-marker {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7em; font-weight: bold;
+            z-index: 2;
+            position: relative;
+        }
+        .marker-root {
+            background: var(--root-bg);
+            color: var(--root-text);
+            border: 2px solid var(--root-border);
+            border-radius: 4px;
+        }
+        .marker-tone {
+            background: var(--tone-bg);
+            color: var(--tone-text);
+            border: 2px solid var(--tone-border);
+            border-radius: 4px;
+        }
+        .marker-scale {
+            background: var(--scale-bg);
+            color: var(--scale-text);
+            border: 1px solid var(--scale-border);
+        }
+        .text-accent { color: var(--text-accent); }
+
+        /* =========================================
+           NEW THEME DEFINITIONS
+           ========================================= */
+
+        /* 1. Midnight (Deep Blue/Purple) */
+        .theme-midnight {
+            --bg-app: #0f172a;
+            --bg-panel: #1e293b;
+            --bg-element: #1e293b;
+            --bg-input: #0f172a;
+            --bg-fretboard: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%);
+            --border-dim: #334155;
+            --border-bright: #64748b;
+            --text-main: #e2e8f0;
+            --text-highlight: #f8fafc;
+            --text-accent: #818cf8;
+            --btn-bg: #4338ca;
+            --btn-hover: #4f46e5;
+            --btn-text: #ffffff;
+            --btn-border: #312e81;
+            --fret-wire: #94a3b8;
+            --string-color: rgba(148, 163, 184, 0.3);
+            --root-bg: #4338ca;
+            --root-border: #818cf8;
+            --root-text: #ffffff;
+            --tone-bg: #818cf8;
+            --tone-border: #4338ca;
+            --tone-text: #0f172a;
+            --scale-bg: #1e293b;
+            --scale-border: #334155;
+            --scale-text: #94a3b8;
+        }
+
+        /* 2. Paper (Sheet Music Style) */
+        .theme-paper {
+            --bg-app: #fdfbf7;
+            --bg-panel: #f3f0e8;
+            --bg-element: #ffffff;
+            --bg-input: #ffffff;
+            --bg-fretboard: #ffffff;
+            --border-dim: #d1d5db;
+            --border-bright: #9ca3af;
+            --text-main: #374151;
+            --text-highlight: #111827;
+            --text-accent: #b91c1c;
+            --btn-bg: #374151;
+            --btn-hover: #1f2937;
+            --btn-text: #ffffff;
+            --btn-border: #111827;
+            --fret-wire: #6b7280;
+            --string-color: #9ca3af;
+            --root-bg: #111827;
+            --root-border: #000000;
+            --root-text: #ffffff;
+            --tone-bg: #e5e7eb;
+            --tone-border: #374151;
+            --tone-text: #111827;
+            --scale-bg: #ffffff;
+            --scale-border: #d1d5db;
+            --scale-text: #6b7280;
+        }
+
+        /* 3. Terminal (Retro Green) */
+        .theme-terminal {
+            --bg-app: #000000;
+            --bg-panel: #0a0a0a;
+            --bg-element: #000000;
+            --bg-input: #000000;
+            --bg-fretboard: #000000;
+            --border-dim: #003300;
+            --border-bright: #00ff00;
+            --text-main: #00cc00;
+            --text-highlight: #00ff00;
+            --text-accent: #00ff00;
+            --btn-bg: #003300;
+            --btn-hover: #004400;
+            --btn-text: #00ff00;
+            --btn-border: #00ff00;
+            --fret-wire: #006600;
+            --string-color: rgba(0, 255, 0, 0.3);
+            --root-bg: #00ff00;
+            --root-border: #00ff00;
+            --root-text: #000000;
+            --tone-bg: #003300;
+            --tone-border: #00ff00;
+            --tone-text: #00ff00;
+            --scale-bg: #000000;
+            --scale-border: #003300;
+            --scale-text: #006600;
+        }
+
+        /* 4. Oceanic (Teal/Cyan) */
+        .theme-oceanic {
+            --bg-app: #002b36;
+            --bg-panel: #073642;
+            --bg-element: #073642;
+            --bg-input: #002b36;
+            --bg-fretboard: linear-gradient(135deg, #002b36 0%, #001e26 100%);
+            --border-dim: #586e75;
+            --border-bright: #839496;
+            --text-main: #93a1a1;
+            --text-highlight: #eee8d5;
+            --text-accent: #2aa198;
+            --btn-bg: #2aa198;
+            --btn-hover: #268bd2;
+            --btn-text: #fdf6e3;
+            --btn-border: #002b36;
+            --fret-wire: #657b83;
+            --string-color: rgba(147, 161, 161, 0.3);
+            --root-bg: #268bd2;
+            --root-border: #2aa198;
+            --root-text: #fdf6e3;
+            --tone-bg: #2aa198;
+            --tone-border: #268bd2;
+            --tone-text: #002b36;
+            --scale-bg: #073642;
+            --scale-border: #586e75;
+            --scale-text: #839496;
+        }
+
+        /* 5. Sunset (Warm Gradients) */
+        .theme-sunset {
+            --bg-app: #2d1b2e;
+            --bg-panel: #452c45;
+            --bg-element: #452c45;
+            --bg-input: #2d1b2e;
+            --bg-fretboard: linear-gradient(135deg, #562a3b 0%, #2d1b2e 100%);
+            --border-dim: #b04e58;
+            --border-bright: #ff9f1c;
+            --text-main: #ffecd1;
+            --text-highlight: #ffffff;
+            --text-accent: #ff9f1c;
+            --btn-bg: #c44536;
+            --btn-hover: #db504a;
+            --btn-text: #ffffff;
+            --btn-border: #2d1b2e;
+            --fret-wire: #e08e79;
+            --string-color: rgba(255, 236, 209, 0.3);
+            --root-bg: #ff9f1c;
+            --root-border: #ffbf69;
+            --root-text: #2d1b2e;
+            --tone-bg: #c44536;
+            --tone-border: #ff9f1c;
+            --tone-text: #ffffff;
+            --scale-bg: #452c45;
+            --scale-border: #b04e58;
+            --scale-text: #e08e79;
+        }
+
+        /* 6. Slate (Clean Dark Gray) */
+        .theme-slate {
+            --bg-app: #27272a;
+            --bg-panel: #3f3f46;
+            --bg-element: #3f3f46;
+            --bg-input: #27272a;
+            --bg-fretboard: #18181b;
+            --border-dim: #52525b;
+            --border-bright: #a1a1aa;
+            --text-main: #d4d4d8;
+            --text-highlight: #ffffff;
+            --text-accent: #38bdf8;
+            --btn-bg: #52525b;
+            --btn-hover: #71717a;
+            --btn-text: #ffffff;
+            --btn-border: #27272a;
+            --fret-wire: #71717a;
+            --string-color: rgba(212, 212, 216, 0.3);
+            --root-bg: #38bdf8;
+            --root-border: #7dd3fc;
+            --root-text: #000000;
+            --tone-bg: #71717a;
+            --tone-border: #38bdf8;
+            --tone-text: #ffffff;
+            --scale-bg: #27272a;
+            --scale-border: #52525b;
+            --scale-text: #a1a1aa;
+        }
+
+        /* 7. Navy (Classic Blue & Gold) */
+        .theme-navy {
+            --bg-app: #0a192f;
+            --bg-panel: #112240;
+            --bg-element: #112240;
+            --bg-input: #0a192f;
+            --bg-fretboard: #020c1b;
+            --border-dim: #233554;
+            --border-bright: #64ffda;
+            --text-main: #8892b0;
+            --text-highlight: #ccd6f6;
+            --text-accent: #ffd700;
+            --btn-bg: #1d3557;
+            --btn-hover: #457b9d;
+            --btn-text: #ffffff;
+            --btn-border: #000000;
+            --fret-wire: #8892b0;
+            --string-color: rgba(136, 146, 176, 0.3);
+            --root-bg: #ffd700;
+            --root-border: #ffea00;
+            --root-text: #0a192f;
+            --tone-bg: #457b9d;
+            --tone-border: #ffd700;
+            --tone-text: #ffffff;
+            --scale-bg: #112240;
+            --scale-border: #233554;
+            --scale-text: #8892b0;
+        }
+
+        /* 8. Berry (Deep Red/Pink) */
+        .theme-berry {
+            --bg-app: #2e001f;
+            --bg-panel: #4a0033;
+            --bg-element: #4a0033;
+            --bg-input: #2e001f;
+            --bg-fretboard: linear-gradient(135deg, #3d0029 0%, #1a0011 100%);
+            --border-dim: #800040;
+            --border-bright: #ff0055;
+            --text-main: #ffccdd;
+            --text-highlight: #ffffff;
+            --text-accent: #ff0055;
+            --btn-bg: #800040;
+            --btn-hover: #b30059;
+            --btn-text: #ffffff;
+            --btn-border: #1a0011;
+            --fret-wire: #ff6699;
+            --string-color: rgba(255, 204, 221, 0.3);
+            --root-bg: #ff0055;
+            --root-border: #ff6699;
+            --root-text: #ffffff;
+            --tone-bg: #ff99bb;
+            --tone-border: #ff0055;
+            --tone-text: #2e001f;
+            --scale-bg: #4a0033;
+            --scale-border: #800040;
+            --scale-text: #ff6699;
+        }
+
+        /* 9. Forest (Deep Green/Brown) */
+        .theme-forest {
+            --bg-app: #051a05;
+            --bg-panel: #0d2e0d;
+            --bg-element: #0d2e0d;
+            --bg-input: #051a05;
+            --bg-fretboard: linear-gradient(135deg, #1a1510 0%, #0d0a08 100%);
+            --border-dim: #1b4d1b;
+            --border-bright: #4caf50;
+            --text-main: #a5d6a7;
+            --text-highlight: #e8f5e9;
+            --text-accent: #4caf50;
+            --btn-bg: #2e7d32;
+            --btn-hover: #388e3c;
+            --btn-text: #ffffff;
+            --btn-border: #1b5e20;
+            --fret-wire: #8d6e63;
+            --string-color: rgba(165, 214, 167, 0.3);
+            --root-bg: #4caf50;
+            --root-border: #81c784;
+            --root-text: #051a05;
+            --tone-bg: #8d6e63;
+            --tone-border: #4caf50;
+            --tone-text: #ffffff;
+            --scale-bg: #0d2e0d;
+            --scale-border: #1b4d1b;
+            --scale-text: #66bb6a;
+        }
+
+        /* 10. Vaporwave (Neon) */
+        .theme-vaporwave {
+            --bg-app: #09090b;
+            --bg-panel: #18181b;
+            --bg-element: #18181b;
+            --bg-input: #09090b;
+            --bg-fretboard: #000000;
+            --border-dim: #27272a;
+            --border-bright: #f472b6;
+            --text-main: #e4e4e7;
+            --text-highlight: #ffffff;
+            --text-accent: #f472b6;
+            --btn-bg: #db2777;
+            --btn-hover: #be185d;
+            --btn-text: #ffffff;
+            --btn-border: #831843;
+            --fret-wire: #22d3ee;
+            --string-color: rgba(34, 211, 238, 0.3);
+            --root-bg: #f472b6;
+            --root-border: #f9a8d4;
+            --root-text: #000000;
+            --tone-bg: #22d3ee;
+            --tone-border: #06b6d4;
+            --tone-text: #000000;
+            --scale-bg: #18181b;
+            --scale-border: #27272a;
+            --scale-text: #a1a1aa;
+        }
+    </style>
+</head>
+<body>
+    <h1>FretForge Theme Preview</h1>
+    <div class="grid">
+        <!-- Theme 1 -->
+        <div class="theme-card">
+            <div class="theme-header">Midnight</div>
+            <div class="preview-box theme-midnight">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 2 -->
+        <div class="theme-card">
+            <div class="theme-header">Paper</div>
+            <div class="preview-box theme-paper">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 3 -->
+        <div class="theme-card">
+            <div class="theme-header">Terminal</div>
+            <div class="preview-box theme-terminal">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 4 -->
+        <div class="theme-card">
+            <div class="theme-header">Oceanic</div>
+            <div class="preview-box theme-oceanic">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 5 -->
+        <div class="theme-card">
+            <div class="theme-header">Sunset</div>
+            <div class="preview-box theme-sunset">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 6 -->
+        <div class="theme-card">
+            <div class="theme-header">Slate</div>
+            <div class="preview-box theme-slate">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 7 -->
+        <div class="theme-card">
+            <div class="theme-header">Navy</div>
+            <div class="preview-box theme-navy">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 8 -->
+        <div class="theme-card">
+            <div class="theme-header">Berry</div>
+            <div class="preview-box theme-berry">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 9 -->
+        <div class="theme-card">
+            <div class="theme-header">Forest</div>
+            <div class="preview-box theme-forest">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme 10 -->
+        <div class="theme-card">
+            <div class="theme-header">Vaporwave</div>
+            <div class="preview-box theme-vaporwave">
+                <div class="mock-toolbar">
+                    <span class="text-accent">FretForge</span>
+                    <button class="mock-btn">Mode</button>
+                    <div class="mock-input">Instrument</div>
+                </div>
+                <div class="mock-fretboard">
+                    <div class="mock-string" style="top: 20%"></div>
+                    <div class="mock-string" style="top: 50%"></div>
+                    <div class="mock-string" style="top: 80%"></div>
+                    <div class="mock-fret" style="left: 30%"></div>
+                    <div class="mock-fret" style="left: 60%"></div>
+                    <div class="mock-marker marker-root" style="left: -10px">R</div>
+                    <div class="mock-marker marker-tone" style="left: 10px">3</div>
+                    <div class="mock-marker marker-scale" style="left: 30px">2</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
