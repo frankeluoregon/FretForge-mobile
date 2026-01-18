@@ -57,7 +57,12 @@ function App() {
     const [mode, setMode] = useState(savedSettings.mode || 'fretboard');
     const [instrument, setInstrument] = useState(savedSettings.instrument || 'guitar');
     const [guitarTuning, setGuitarTuning] = useState(savedSettings.guitarTuning || 'standard');
-    const [numFrets, setNumFrets] = useState(savedSettings.numFrets || 12);
+    const [numFrets, setNumFrets] = useState(() => {
+        if (window.innerWidth <= 768) {
+            return window.innerWidth > window.innerHeight ? 12 : 5;
+        }
+        return savedSettings.numFrets || 12;
+    });
     const [showScaleNotes, setShowScaleNotes] = useState(savedSettings.showScaleNotes ?? true);
     const [showLeadingNotes, setShowLeadingNotes] = useState(savedSettings.showLeadingNotes ?? true);
     const [theme, setTheme] = useState(savedSettings.theme || 'default');
@@ -67,6 +72,8 @@ function App() {
     const [pdfOrientation, setPdfOrientation] = useState('landscape');
     const [showPdfOptions, setShowPdfOptions] = useState(false);
     const [showZoomPopup, setShowZoomPopup] = useState(false);
+    const [showInstrumentPopup, setShowInstrumentPopup] = useState(false);
+    const [showThemePopup, setShowThemePopup] = useState(false);
 
     // Progression State
     const [progKey, setProgKey] = useState(savedSettings.progKey || 'C');
@@ -125,7 +132,9 @@ function App() {
             // Only apply on mobile devices
             if (window.innerWidth <= 768) {
                 // Update fret count based on orientation
-                setNumFrets(12);
+                // Portrait: 5 frets, Landscape: 12 frets
+                const isLandscape = window.innerWidth > window.innerHeight;
+                setNumFrets(isLandscape ? 12 : 5);
             }
         };
 
@@ -185,18 +194,24 @@ function App() {
         };
     }, []);
 
-    // Effect to close zoom popup on outside click
+    // Effect to close popups on outside click
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (showZoomPopup && !event.target.closest('.zoom-wrapper')) {
                 setShowZoomPopup(false);
+            }
+            if (showInstrumentPopup && !event.target.closest('.instrument-wrapper')) {
+                setShowInstrumentPopup(false);
+            }
+            if (showThemePopup && !event.target.closest('.theme-wrapper')) {
+                setShowThemePopup(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [showZoomPopup]);
+    }, [showZoomPopup, showInstrumentPopup, showThemePopup]);
 
     // Dynamic Body Padding for Fixed Header
     useEffect(() => {
@@ -554,65 +569,122 @@ function App() {
                             <span className="app-title">FretForge</span>
                         </div>
                         
-                        <div className="mode-toggle">
-                            <button 
-                                className={`mode-btn ${mode === 'fretboard' ? 'active' : ''}`}
-                                onClick={() => switchMode('fretboard')}
-                            >Chord Select</button>
-                            <button 
-                                className={`mode-btn ${mode === 'progression' ? 'active' : ''}`}
-                                onClick={() => switchMode('progression')}
-                            >Progression</button>
+                        <div className={`primary-controls ${mode === 'fretboard' ? 'centered-mode' : ''}`}>
+                            <div className="mode-toggle">
+                                <button 
+                                    className={`mode-btn ${mode === 'fretboard' ? 'active' : ''}`}
+                                    onClick={() => switchMode('fretboard')}
+                                >Chord Select</button>
+                                <button 
+                                    className={`mode-btn ${mode === 'progression' ? 'active' : ''}`}
+                                    onClick={() => switchMode('progression')}
+                                >Progression</button>
+                            </div>
+
+                            <div className="toggles-wrapper">
+                                <button
+                                    className={`filter-toggle-btn ${showScaleNotes ? 'active' : ''}`}
+                                    onClick={() => setShowScaleNotes(s => !s)}
+                                    title="Toggle Scale Notes"
+                                >
+                                    Scale Notes
+                                </button>
+
+                                {mode === 'progression' && (
+                                    <button
+                                        className={`filter-toggle-btn ${showLeadingNotes ? 'active' : ''}`}
+                                        onClick={() => setShowLeadingNotes(s => !s)}
+                                        title="Toggle Leading Notes"
+                                    >
+                                        Leading Notes
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         <div className="top-row-controls">
+                            {/* Instrument Icon with Flyout */}
+                            <div className="input-group instrument-wrapper">
+                                <button className="toolbar-btn" onClick={() => setShowInstrumentPopup(s => !s)} title="Instrument">
+                                    <span className="icon-mask icon-guitar"></span>
+                                </button>
+                                {showInstrumentPopup && (
+                                    <div className="tray-popup instrument-popup">
+                                        <select value={instrument} onChange={(e) => { setInstrument(e.target.value); setShowInstrumentPopup(false); }}>
+                                            <option value="guitar">Guitar</option>
+                                            <option value="bass4">Bass (4-string)</option>
+                                            <option value="bass5">Bass (5-string)</option>
+                                            <option value="bass6">Bass (6-string)</option>
+                                            <option value="ukulele">Ukulele</option>
+                                            <option value="mandolin">Mandolin</option>
+                                        </select>
+                                        {instrument === 'guitar' && (
+                                            <select value={guitarTuning} onChange={(e) => { setGuitarTuning(e.target.value); setShowInstrumentPopup(false); }}>
+                                                <option value="standard">Standard</option>
+                                                <option value="dropD">Drop D</option>
+                                                <option value="dadgad">DADGAD</option>
+                                            </select>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Zoom Icon with Flyout */}
                             <div className="input-group zoom-wrapper">
-                                <button className="zoom-popup-btn" onClick={() => setShowZoomPopup(s => !s)}>
-                                    <span>Zoom:</span>
-                                    <span className="zoom-value">{zoom}%</span>
+                                <button className="toolbar-btn" onClick={() => setShowZoomPopup(s => !s)} title="Zoom">
+                                    <span className="icon-mask icon-zoom"></span>
                                 </button>
                                 {showZoomPopup && (
-                                    <div className="zoom-popup">
-                                        <input 
-                                            type="range" 
-                                            min="50" 
-                                            max="150" 
-                                            value={zoom} 
-                                            onChange={(e) => setZoom(e.target.value)} 
+                                    <div className="tray-popup zoom-popup">
+                                        <span className="zoom-label">{zoom}%</span>
+                                        <input
+                                            type="range"
+                                            min="50"
+                                            max="150"
+                                            value={zoom}
+                                            onChange={(e) => setZoom(e.target.value)}
                                             className="zoom-slider-popup"
                                         />
                                     </div>
                                 )}
                             </div>
-                            <div className="input-group theme-group">
-                                <label>Theme:</label>
-                                <select className="theme-select" onChange={(e) => setTheme(e.target.value)} value={theme}>
-                                    <option value="default">Dark Wood</option>
-                                    <option value="theme-light-wood">Light Wood</option>
-                                    <option value="theme-light">Light</option>
-                                    <option value="theme-high-contrast">High Contrast</option>
-                                    <option value="theme-midnight">Midnight</option>
-                                    <option value="theme-paper">Paper</option>
-                                    <option value="theme-terminal">Terminal</option>
-                                    <option value="theme-oceanic">Oceanic</option>
-                                    <option value="theme-sunset">Sunset</option>
-                                    <option value="theme-slate">Slate</option>
-                                    <option value="theme-navy">Navy</option>
-                                    <option value="theme-berry">Berry</option>
-                                    <option value="theme-forest">Forest</option>
-                                    <option value="theme-vaporwave">Vaporwave</option>
-                                </select>
+
+                            {/* Theme/Palette Icon with Flyout */}
+                            <div className="input-group theme-wrapper">
+                                <button className="toolbar-btn" onClick={() => setShowThemePopup(s => !s)} title="Theme">
+                                    <span className="icon-mask icon-palette"></span>
+                                </button>
+                                {showThemePopup && (
+                                    <div className="tray-popup theme-popup">
+                                        <select className="theme-select" onChange={(e) => { setTheme(e.target.value); setShowThemePopup(false); }} value={theme}>
+                                            <option value="default">Dark Wood</option>
+                                            <option value="theme-light-wood">Light Wood</option>
+                                            <option value="theme-light">Light</option>
+                                            <option value="theme-high-contrast">High Contrast</option>
+                                            <option value="theme-midnight">Midnight</option>
+                                            <option value="theme-paper">Paper</option>
+                                            <option value="theme-terminal">Terminal</option>
+                                            <option value="theme-oceanic">Oceanic</option>
+                                            <option value="theme-sunset">Sunset</option>
+                                            <option value="theme-slate">Slate</option>
+                                            <option value="theme-navy">Navy</option>
+                                            <option value="theme-berry">Berry</option>
+                                            <option value="theme-forest">Forest</option>
+                                            <option value="theme-vaporwave">Vaporwave</option>
+                                        </select>
+                                    </div>
+                                )}
                             </div>
                             <div className="input-group">
                                 <button className="toolbar-btn" onClick={toggleMute} title={isMuted ? "Unmute" : "Mute"}>
                                     {isMuted ? (
-                                        <svg className="control-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                                             <line x1="23" y1="9" x2="17" y2="15"></line>
                                             <line x1="17" y1="9" x2="23" y2="15"></line>
                                         </svg>
                                     ) : (
-                                        <svg className="control-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                                             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                                         </svg>
@@ -622,7 +694,7 @@ function App() {
                             <div className="input-group">
                                 {!showPdfOptions ? (
                                     <button className="toolbar-btn" onClick={() => setShowPdfOptions(true)} title="Export PDF">
-                                        <svg className="control-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                             <polyline points="14 2 14 8 20 8"></polyline>
                                             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -649,106 +721,63 @@ function App() {
                                     </div>
                                 )}
                             </div>
-                            <div className="input-group">
+                            <div className="input-group reset-wrapper">
                                 <button className="toolbar-btn" onClick={resetSettings} title="Reset Settings">
-                                    {/* Refresh/Reset Icon */}
-                                    <span style={{ fontSize: '18px' }}>↺</span>
+                                    <span className="icon-mask icon-reset"></span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <div className="top-bar-row bottom-row">
-                        <div className="bottom-left-controls">
-                            <div className="dropdowns-group">
-                                <div className="input-group instrument-group">
-                                    <label>Instrument:</label>
-                                    <select value={instrument} onChange={(e) => setInstrument(e.target.value)}>
-                                        <option value="guitar">Guitar</option>
-                                        <option value="bass4">Bass (4-string)</option>
-                                        <option value="bass5">Bass (5-string)</option>
-                                        <option value="bass6">Bass (6-string)</option>
-                                        <option value="ukulele">Ukulele</option>
-                                        <option value="mandolin">Mandolin</option>
+                    {/* Controls bar - Scale Notes always visible, Leading Notes only in progression mode */}
+                    <div className="controls-bar">
+                        {mode === 'progression' && (
+                            <div className="progression-controls-left">
+                                <div className="input-group">
+                                    <select value={progKey} onChange={(e) => setProgKey(e.target.value)}>
+                                        {['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'].map(k => (
+                                            <option key={k} value={k}>{k}</option>
+                                        ))}
+                                    </select>
+                                    <select value={progQuality} onChange={(e) => setProgQuality(e.target.value)}>
+                                        <option value="major">Major</option>
+                                        <option value="minor">Minor</option>
                                     </select>
                                 </div>
-
-                                {instrument === 'guitar' && (
-                                    <div className="input-group tuning-group">
-                                        <label>Tuning:</label>
-                                        <select value={guitarTuning} onChange={(e) => setGuitarTuning(e.target.value)}>
-                                            <option value="standard">Standard</option>
-                                            <option value="dropD">Drop D</option>
-                                            <option value="dadgad">DADGAD</option>
-                                        </select>
-                                    </div>
-                                )}
-
-                                <div className="input-group frets-group">
-                                    <label>Frets:</label>
-                                    <select value={numFrets} onChange={(e) => setNumFrets(Number(e.target.value))}>
-                                        <option value={5}>5</option>
-                                        <option value={7}>7</option>
-                                        <option value={12}>12</option>
-                                        <option value={15}>15</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="filters-group">
-                                <div className="input-group scale-notes-group">
-                                    <label>
-                                        <input 
-                                            type="checkbox" 
-                                            checked={showScaleNotes} 
-                                            onChange={(e) => setShowScaleNotes(e.target.checked)} 
-                                        /> Scale Notes
-                                    </label>
-                                </div>
-
-                                {mode === 'progression' && (
-                                    <div className="input-group leading-notes-group">
-                                        <label>
-                                            <input 
-                                                type="checkbox" 
-                                                checked={showLeadingNotes} 
-                                                onChange={(e) => setShowLeadingNotes(e.target.checked)} 
-                                            /> Leading Notes
-                                        </label>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {mode === 'progression' && (
-                        <div className="progression-select-row">
-                            <div className="input-group">
-                                <select value={progKey} onChange={(e) => setProgKey(e.target.value)}>
-                                    {['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'].map(k => (
-                                        <option key={k} value={k}>{k}</option>
+                                <select
+                                    className="progression-select"
+                                    value={selectedProgression}
+                                    onChange={(e) => loadProgression(e.target.value)}
+                                >
+                                    <option value="">Select Progression...</option>
+                                    {Progressions.getProgressions().map(p => (
+                                        <option key={p.value} value={p.value}>{p.name}</option>
                                     ))}
                                 </select>
-                                <select value={progQuality} onChange={(e) => setProgQuality(e.target.value)}>
-                                    <option value="major">Major</option>
-                                    <option value="minor">Minor</option>
-                                </select>
+                                <button className="playback-button" onClick={() => MIDIPlayer.playProgression(chords, instrument, currentTuning, 'strum')}>
+                                    Play All
+                                </button>
                             </div>
-                            <select 
-                                className="progression-select"
-                                value={selectedProgression} 
-                                onChange={(e) => loadProgression(e.target.value)}
+                        )}
+                        <div className="filter-toggles-bar">
+                            <button
+                                className={`filter-toggle-btn ${showScaleNotes ? 'active' : ''}`}
+                                onClick={() => setShowScaleNotes(s => !s)}
+                                title="Toggle Scale Notes"
                             >
-                                <option value="">Select Progression...</option>
-                                {Progressions.getProgressions().map(p => (
-                                    <option key={p.value} value={p.value}>{p.name}</option>
-                                ))}
-                            </select>
-                            <button className="playback-button" onClick={() => MIDIPlayer.playProgression(chords, instrument, currentTuning, 'strum')}>
-                                Play All
+                                Scale Notes
                             </button>
+                            {mode === 'progression' && (
+                                <button
+                                    className={`filter-toggle-btn ${showLeadingNotes ? 'active' : ''}`}
+                                    onClick={() => setShowLeadingNotes(s => !s)}
+                                    title="Toggle Leading Notes"
+                                >
+                                    Leading Notes
+                                </button>
+                            )}
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
 
