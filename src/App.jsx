@@ -70,9 +70,7 @@ function App() {
     const [playbackMode, setPlaybackMode] = useState(savedSettings.playbackMode || 'strum');
     const [isMuted, setIsMuted] = useState(false);
     const [pdfOrientation, setPdfOrientation] = useState('landscape');
-    const [showPdfOptions, setShowPdfOptions] = useState(false);
-    const [showSettingsMenu, setShowSettingsMenu] = useState(false);
-    const [showAccordionMenu, setShowAccordionMenu] = useState(false);
+    const [activeUtilityPanel, setActiveUtilityPanel] = useState(null); // 'instrument', 'theme', 'zoom', 'print', null
 
     // Progression State
     const [progKey, setProgKey] = useState(savedSettings.progKey || 'C');
@@ -194,23 +192,18 @@ function App() {
     }, []);
 
     // Effect to close menus on outside click
+    // Close utility panel on outside click
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (showAccordionMenu && !event.target.closest('.top-bar')) {
-                setShowAccordionMenu(false);
-            }
-            if (showSettingsMenu && !event.target.closest('.settings-menu-wrapper')) {
-                setShowSettingsMenu(false);
-            }
-            if (showPdfOptions && !event.target.closest('.pdf-options-wrapper')) {
-                setShowPdfOptions(false);
+            if (activeUtilityPanel && !event.target.closest('.utility-bar') && !event.target.closest('.utility-panel')) {
+                setActiveUtilityPanel(null);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [showAccordionMenu, showSettingsMenu, showPdfOptions]);
+    }, [activeUtilityPanel]);
 
     // Dynamic Body Padding for Fixed Header
     useEffect(() => {
@@ -563,6 +556,7 @@ function App() {
             {/* Top Bar */}
             <div className="top-bar">
                 <div className="top-bar-content">
+                    {/* Header Row */}
                     <div className="top-bar-row">
                         <div className="app-header">
                             <Logo className="app-logo" />
@@ -579,173 +573,242 @@ function App() {
                                 onClick={() => switchMode('progression')}
                             >Progression</button>
                         </div>
+                    </div>
 
+                    {/* Utility Bar */}
+                    <div className="utility-bar">
+                        {/* Instrument */}
                         <button
-                            className="menu-toggle-btn"
-                            onClick={() => setShowAccordionMenu(s => !s)}
-                            title="Menu"
+                            className={`utility-btn ${activeUtilityPanel === 'instrument' ? 'active' : ''}`}
+                            onClick={() => setActiveUtilityPanel(activeUtilityPanel === 'instrument' ? null : 'instrument')}
+                            title="Select instrument and tuning"
                         >
-                            {showAccordionMenu ? '▲' : '▼'}
+                            <span className="icon-mask icon-instrument"></span>
+                            <span className="utility-label">Instrument</span>
+                        </button>
+
+                        {/* Theme */}
+                        <button
+                            className={`utility-btn ${activeUtilityPanel === 'theme' ? 'active' : ''}`}
+                            onClick={() => setActiveUtilityPanel(activeUtilityPanel === 'theme' ? null : 'theme')}
+                            title="Change color theme"
+                        >
+                            <span className="icon-mask icon-palette"></span>
+                            <span className="utility-label">Theme</span>
+                        </button>
+
+                        {/* Zoom */}
+                        <button
+                            className={`utility-btn ${activeUtilityPanel === 'zoom' ? 'active' : ''}`}
+                            onClick={() => setActiveUtilityPanel(activeUtilityPanel === 'zoom' ? null : 'zoom')}
+                            title="Adjust fretboard size"
+                        >
+                            <span className="icon-mask icon-zoom"></span>
+                            <span className="utility-label">Zoom</span>
+                        </button>
+
+                        {/* Print/PDF */}
+                        <button
+                            className={`utility-btn ${activeUtilityPanel === 'print' ? 'active' : ''}`}
+                            onClick={() => setActiveUtilityPanel(activeUtilityPanel === 'print' ? null : 'print')}
+                            title="Export to PDF"
+                        >
+                            <span className="icon-mask icon-pdf"></span>
+                            <span className="utility-label">Print</span>
+                        </button>
+
+                        {/* Mute Toggle */}
+                        <button
+                            className={`utility-btn utility-toggle ${isMuted ? 'off' : ''}`}
+                            onClick={toggleMute}
+                            title={isMuted ? "Sound is muted" : "Sound is on"}
+                        >
+                            <span className={`icon-mask ${isMuted ? 'icon-mute' : 'icon-volume'}`}></span>
+                            <span className="utility-label">{isMuted ? 'Muted' : 'Sound'}</span>
+                        </button>
+
+                        {/* Scale Notes Toggle */}
+                        <button
+                            className={`utility-btn utility-toggle ${!showScaleNotes ? 'off' : ''}`}
+                            onClick={() => setShowScaleNotes(s => !s)}
+                            title={showScaleNotes ? "Scale notes visible" : "Scale notes hidden"}
+                        >
+                            <span className="icon-mask icon-scale"></span>
+                            <span className="utility-label">Scale</span>
+                        </button>
+
+                        {/* Leading Notes Toggle - Progression mode only */}
+                        {mode === 'progression' && (
+                            <button
+                                className={`utility-btn utility-toggle ${!showLeadingNotes ? 'off' : ''}`}
+                                onClick={() => setShowLeadingNotes(s => !s)}
+                                title={showLeadingNotes ? "Leading notes visible" : "Leading notes hidden"}
+                            >
+                                <span className="icon-mask icon-leading"></span>
+                                <span className="utility-label">Leading</span>
+                            </button>
+                        )}
+
+                        {/* Reset */}
+                        <button
+                            className="utility-btn"
+                            onClick={resetFretboardSettings}
+                            title="Reset view to defaults"
+                        >
+                            <span className="icon-mask icon-reset"></span>
+                            <span className="utility-label">Reset</span>
                         </button>
                     </div>
 
-                    {/* Accordion Menu */}
-                    {showAccordionMenu && (
-                        <div className="accordion-menu">
-                            {/* Quick Actions */}
-                            <div className="accordion-section quick-actions">
-                                <button className="toolbar-btn" onClick={toggleMute} title={isMuted ? "Unmute" : "Mute"}>
-                                    <span className={`icon-mask ${isMuted ? 'icon-mute' : 'icon-volume'}`}></span>
-                                </button>
-
-                                {!showPdfOptions ? (
-                                    <button className="toolbar-btn" onClick={() => setShowPdfOptions(true)} title="Export PDF">
-                                        <span className="icon-mask icon-pdf"></span>
-                                    </button>
-                                ) : (
-                                    <>
-                                        <select
-                                            className="pdf-select"
-                                            value={pdfOrientation}
-                                            onChange={(e) => setPdfOrientation(e.target.value)}
-                                        >
-                                            <option value="landscape">Land</option>
-                                            <option value="portrait">Port</option>
+                    {/* Expandable Utility Panels */}
+                    {activeUtilityPanel && (
+                        <div className="utility-panel">
+                            {/* Instrument Panel */}
+                            {activeUtilityPanel === 'instrument' && (
+                                <div className="utility-panel-content">
+                                    <div className="panel-row">
+                                        <label>Instrument</label>
+                                        <select value={instrument} onChange={(e) => setInstrument(e.target.value)}>
+                                            <option value="guitar">Guitar</option>
+                                            <option value="bass4">Bass (4-string)</option>
+                                            <option value="bass5">Bass (5-string)</option>
+                                            <option value="bass6">Bass (6-string)</option>
+                                            <option value="ukulele">Ukulele</option>
+                                            <option value="mandolin">Mandolin</option>
                                         </select>
-                                        <button className="toolbar-btn" onClick={exportToPDF} title="Download">
-                                            <span className="icon-mask icon-download"></span>
-                                        </button>
-                                        <button className="toolbar-btn" onClick={() => setShowPdfOptions(false)} title="Cancel">
-                                            <span className="icon-mask icon-close"></span>
-                                        </button>
-                                    </>
-                                )}
-
-                                <div className="input-group settings-menu-wrapper">
-                                    <button className="toolbar-btn" onClick={() => setShowSettingsMenu(s => !s)} title="Settings">
-                                        <span className="icon-mask icon-settings"></span>
-                                    </button>
-                                    {showSettingsMenu && (
-                                        <div className="settings-menu">
-                                            <div className="settings-menu-section">
-                                                <div className="settings-menu-item">
-                                                    <span className="icon-mask icon-instrument settings-icon"></span>
-                                                    <select value={instrument} onChange={(e) => setInstrument(e.target.value)}>
-                                                        <option value="guitar">Guitar</option>
-                                                        <option value="bass4">Bass (4-string)</option>
-                                                        <option value="bass5">Bass (5-string)</option>
-                                                        <option value="bass6">Bass (6-string)</option>
-                                                        <option value="ukulele">Ukulele</option>
-                                                        <option value="mandolin">Mandolin</option>
-                                                    </select>
-                                                </div>
-                                                {instrument === 'guitar' && (
-                                                    <div className="settings-menu-item">
-                                                        <select value={guitarTuning} onChange={(e) => setGuitarTuning(e.target.value)}>
-                                                            <option value="standard">Standard</option>
-                                                            <option value="dropD">Drop D</option>
-                                                            <option value="dadgad">DADGAD</option>
-                                                        </select>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="settings-menu-section">
-                                                <div className="settings-menu-item">
-                                                    <span className="icon-mask icon-zoom settings-icon"></span>
-                                                    <div className="zoom-control">
-                                                        <input type="range" min="50" max="150" value={zoom} onChange={(e) => setZoom(e.target.value)} className="zoom-slider" />
-                                                        <span className="zoom-value">{zoom}%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="settings-menu-section">
-                                                <div className="settings-menu-item">
-                                                    <span className="icon-mask icon-palette settings-icon"></span>
-                                                    <select value={theme} onChange={(e) => setTheme(e.target.value)}>
-                                                        <option value="default">Dark Wood</option>
-                                                        <option value="theme-light-wood">Light Wood</option>
-                                                        <option value="theme-light">Light</option>
-                                                        <option value="theme-high-contrast">High Contrast</option>
-                                                        <option value="theme-midnight">Midnight</option>
-                                                        <option value="theme-paper">Paper</option>
-                                                        <option value="theme-terminal">Terminal</option>
-                                                        <option value="theme-oceanic">Oceanic</option>
-                                                        <option value="theme-sunset">Sunset</option>
-                                                        <option value="theme-slate">Slate</option>
-                                                        <option value="theme-navy">Navy</option>
-                                                        <option value="theme-berry">Berry</option>
-                                                        <option value="theme-forest">Forest</option>
-                                                        <option value="theme-vaporwave">Vaporwave</option>
-                                                        <option value="theme-ruby">Ruby</option>
-                                                        <option value="theme-magenta">Magenta</option>
-                                                        <option value="theme-ivory">Ivory</option>
-                                                        <option value="theme-turquoise">Turquoise</option>
-                                                        <option value="theme-sunburst">Sunburst</option>
-                                                        <option value="theme-eclipse">Eclipse</option>
-                                                        <option value="theme-sapphire">Sapphire</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="settings-menu-section">
-                                                <button className="settings-menu-item reset-btn" onClick={resetFretboardSettings}>
-                                                    <span className="icon-mask icon-reset settings-icon"></span>
-                                                    <span>Reset View</span>
-                                                </button>
-                                            </div>
+                                    </div>
+                                    {instrument === 'guitar' && (
+                                        <div className="panel-row">
+                                            <label>Tuning</label>
+                                            <select value={guitarTuning} onChange={(e) => setGuitarTuning(e.target.value)}>
+                                                <option value="standard">Standard (EADGBE)</option>
+                                                <option value="dropD">Drop D</option>
+                                                <option value="dadgad">DADGAD</option>
+                                            </select>
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            )}
 
-                            {/* Filter Toggles */}
-                            <div className="accordion-section filter-section">
-                                <button
-                                    className={`filter-toggle-btn ${showScaleNotes ? 'active' : ''}`}
-                                    onClick={() => setShowScaleNotes(s => !s)}
-                                    title="Toggle Scale Notes"
-                                >
-                                    Scale Notes
-                                </button>
-                                {mode === 'progression' && (
-                                    <button
-                                        className={`filter-toggle-btn ${showLeadingNotes ? 'active' : ''}`}
-                                        onClick={() => setShowLeadingNotes(s => !s)}
-                                        title="Toggle Leading Notes"
-                                    >
-                                        Leading Notes
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Progression Controls */}
-                            {mode === 'progression' && (
-                                <div className="accordion-section progression-section">
-                                    <div className="input-group">
-                                        <select value={progKey} onChange={(e) => setProgKey(e.target.value)}>
-                                            {['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'].map(k => (
-                                                <option key={k} value={k}>{k}</option>
-                                            ))}
-                                        </select>
-                                        <select value={progQuality} onChange={(e) => setProgQuality(e.target.value)}>
-                                            <option value="major">Major</option>
-                                            <option value="minor">Minor</option>
-                                        </select>
-                                    </div>
-                                    <select
-                                        className="progression-select"
-                                        value={selectedProgression}
-                                        onChange={(e) => loadProgression(e.target.value)}
-                                    >
-                                        <option value="">Select Progression...</option>
-                                        {Progressions.getProgressions().map(p => (
-                                            <option key={p.value} value={p.value}>{p.name}</option>
+                            {/* Theme Panel */}
+                            {activeUtilityPanel === 'theme' && (
+                                <div className="utility-panel-content theme-panel">
+                                    <div className="theme-grid">
+                                        {[
+                                            { value: 'default', name: 'Dark Wood' },
+                                            { value: 'theme-light-wood', name: 'Light Wood' },
+                                            { value: 'theme-light', name: 'Light' },
+                                            { value: 'theme-high-contrast', name: 'High Contrast' },
+                                            { value: 'theme-midnight', name: 'Midnight' },
+                                            { value: 'theme-paper', name: 'Paper' },
+                                            { value: 'theme-terminal', name: 'Terminal' },
+                                            { value: 'theme-oceanic', name: 'Oceanic' },
+                                            { value: 'theme-sunset', name: 'Sunset' },
+                                            { value: 'theme-slate', name: 'Slate' },
+                                            { value: 'theme-navy', name: 'Navy' },
+                                            { value: 'theme-berry', name: 'Berry' },
+                                            { value: 'theme-forest', name: 'Forest' },
+                                            { value: 'theme-vaporwave', name: 'Vaporwave' },
+                                            { value: 'theme-ruby', name: 'Ruby' },
+                                            { value: 'theme-magenta', name: 'Magenta' },
+                                            { value: 'theme-ivory', name: 'Ivory' },
+                                            { value: 'theme-turquoise', name: 'Turquoise' },
+                                            { value: 'theme-sunburst', name: 'Sunburst' },
+                                            { value: 'theme-eclipse', name: 'Eclipse' },
+                                            { value: 'theme-sapphire', name: 'Sapphire' },
+                                        ].map(t => (
+                                            <button
+                                                key={t.value}
+                                                className={`theme-btn ${theme === t.value ? 'active' : ''}`}
+                                                onClick={() => setTheme(t.value)}
+                                            >
+                                                {t.name}
+                                            </button>
                                         ))}
-                                    </select>
-                                    <button className="playback-button" onClick={() => MIDIPlayer.playProgression(chords, instrument, currentTuning, 'strum')}>
-                                        Play All
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Zoom Panel */}
+                            {activeUtilityPanel === 'zoom' && (
+                                <div className="utility-panel-content zoom-panel">
+                                    <div className="panel-row">
+                                        <input
+                                            type="range"
+                                            min="50"
+                                            max="150"
+                                            value={zoom}
+                                            onChange={(e) => setZoom(e.target.value)}
+                                            className="zoom-slider"
+                                        />
+                                        <span className="zoom-value">{zoom}%</span>
+                                    </div>
+                                    <div className="zoom-presets">
+                                        <button onClick={() => setZoom(50)}>50%</button>
+                                        <button onClick={() => setZoom(75)}>75%</button>
+                                        <button onClick={() => setZoom(100)}>100%</button>
+                                        <button onClick={() => setZoom(125)}>125%</button>
+                                        <button onClick={() => setZoom(150)}>150%</button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Print Panel */}
+                            {activeUtilityPanel === 'print' && (
+                                <div className="utility-panel-content print-panel">
+                                    <div className="panel-row">
+                                        <label>Orientation</label>
+                                        <div className="orientation-btns">
+                                            <button
+                                                className={pdfOrientation === 'landscape' ? 'active' : ''}
+                                                onClick={() => setPdfOrientation('landscape')}
+                                            >
+                                                Landscape
+                                            </button>
+                                            <button
+                                                className={pdfOrientation === 'portrait' ? 'active' : ''}
+                                                onClick={() => setPdfOrientation('portrait')}
+                                            >
+                                                Portrait
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button className="export-btn" onClick={() => { exportToPDF(); setActiveUtilityPanel(null); }}>
+                                        <span className="icon-mask icon-download"></span>
+                                        Export PDF
                                     </button>
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Progression Controls - Only in progression mode */}
+                    {mode === 'progression' && (
+                        <div className="progression-controls">
+                            <div className="prog-selects">
+                                <select value={progKey} onChange={(e) => setProgKey(e.target.value)}>
+                                    {['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'].map(k => (
+                                        <option key={k} value={k}>{k}</option>
+                                    ))}
+                                </select>
+                                <select value={progQuality} onChange={(e) => setProgQuality(e.target.value)}>
+                                    <option value="major">Major</option>
+                                    <option value="minor">Minor</option>
+                                </select>
+                                <select
+                                    className="progression-select"
+                                    value={selectedProgression}
+                                    onChange={(e) => loadProgression(e.target.value)}
+                                >
+                                    <option value="">Select Progression...</option>
+                                    {Progressions.getProgressions().map(p => (
+                                        <option key={p.value} value={p.value}>{p.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button className="playback-button" onClick={() => MIDIPlayer.playProgression(chords, instrument, currentTuning, 'strum')}>
+                                Play All
+                            </button>
                         </div>
                     )}
                 </div>
