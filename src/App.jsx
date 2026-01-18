@@ -683,6 +683,13 @@ function App() {
                                             <option value="theme-berry">Berry</option>
                                             <option value="theme-forest">Forest</option>
                                             <option value="theme-vaporwave">Vaporwave</option>
+                                            <option value="theme-ruby">Ruby</option>
+                                            <option value="theme-magenta">Magenta</option>
+                                            <option value="theme-ivory">Ivory</option>
+                                            <option value="theme-turquoise">Turquoise</option>
+                                            <option value="theme-sunburst">Sunburst</option>
+                                            <option value="theme-eclipse">Eclipse</option>
+                                            <option value="theme-sapphire">Sapphire</option>
                                         </select>
                                     </div>
                                 )}

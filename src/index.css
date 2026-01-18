@@ -664,6 +664,272 @@
     --logo-color: #f472b6;
 }
 
+/* 11. Ruby (Deep Red) */
+.theme-ruby {
+    --bg-app: #3d0a0a;
+    --bg-panel: #5c1515;
+    --bg-element: #5c1515;
+    --bg-input: #3d0a0a;
+    --bg-fretboard: linear-gradient(to bottom, #3d0a0a 0%, #7a1f1f 50%, #3d0a0a 100%);
+    --bg-fretboard-outer: #220505;
+    --border-dim: #a02020;
+    --border-bright: #ff4444;
+    --border-focus: #ff6666;
+    --text-main: #ffcccc;
+    --text-highlight: #ffffff;
+    --text-accent: #ff6666;
+    --text-inverse: #3d0a0a;
+    --btn-bg: #c41e3a;
+    --btn-hover: #e63946;
+    --btn-text: #ffffff;
+    --btn-border: #660a0f;
+    --fret-wire: #ff8888;
+    --string-color: rgba(255, 204, 204, 0.3);
+    --nut-bg: #a02020;
+    --inlay-color: #ff6666;
+    --root-bg: #ff4444;
+    --root-border: #ff8888;
+    --root-text: #ffffff;
+    --tone-bg: #ff6666;
+    --tone-border: #c41e3a;
+    --tone-text: #ffffff;
+    --scale-bg: #5c1515;
+    --scale-border: #a02020;
+    --scale-text: #ff8888;
+    --leading-bg: #a02020;
+    --leading-border: #ff6666;
+    --leading-text: #ffcccc;
+    --logo-color: #ff6666;
+}
+
+/* 12. Magenta (Hot Pink) */
+.theme-magenta {
+    --bg-app: #4a1555;
+    --bg-panel: #6b2477;
+    --bg-element: #6b2477;
+    --bg-input: #4a1555;
+    --bg-fretboard: linear-gradient(to bottom, #4a1555 0%, #8b3a8b 50%, #4a1555 100%);
+    --bg-fretboard-outer: #2a0838;
+    --border-dim: #c64fc6;
+    --border-bright: #ff44ff;
+    --border-focus: #ff66ff;
+    --text-main: #ffccff;
+    --text-highlight: #ffffff;
+    --text-accent: #ff66ff;
+    --text-inverse: #4a1555;
+    --btn-bg: #c926c9;
+    --btn-hover: #e946e9;
+    --btn-text: #ffffff;
+    --btn-border: #6b0d6b;
+    --fret-wire: #ff88ff;
+    --string-color: rgba(255, 204, 255, 0.3);
+    --nut-bg: #c64fc6;
+    --inlay-color: #ff66ff;
+    --root-bg: #ff44ff;
+    --root-border: #ff88ff;
+    --root-text: #ffffff;
+    --tone-bg: #ff66ff;
+    --tone-border: #c926c9;
+    --tone-text: #ffffff;
+    --scale-bg: #6b2477;
+    --scale-border: #c64fc6;
+    --scale-text: #ff88ff;
+    --leading-bg: #c64fc6;
+    --leading-border: #ff66ff;
+    --leading-text: #ffccff;
+    --logo-color: #ff66ff;
+}
+
+/* 13. Ivory (Cream/Beige) */
+.theme-ivory {
+    --bg-app: #f5f1e8;
+    --bg-panel: #ebe5d9;
+    --bg-element: #faf8f3;
+    --bg-input: #faf8f3;
+    --bg-fretboard: #ffffff;
+    --bg-fretboard-outer: #e8e4d9;
+    --border-dim: #d4ccc1;
+    --border-bright: #b8a88a;
+    --border-focus: #8b7355;
+    --text-main: #5c4a3d;
+    --text-highlight: #3d2817;
+    --text-accent: #c9a960;
+    --text-inverse: #ffffff;
+    --btn-bg: #8b7355;
+    --btn-hover: #6b5344;
+    --btn-text: #ffffff;
+    --btn-border: #5c4a3d;
+    --fret-wire: #5c4a3d;
+    --string-color: #b8a88a;
+    --nut-bg: #d4ccc1;
+    --inlay-color: #8b7355;
+    --root-bg: #8b7355;
+    --root-border: #3d2817;
+    --root-text: #ffffff;
+    --tone-bg: #e8e4d9;
+    --tone-border: #8b7355;
+    --tone-text: #3d2817;
+    --scale-bg: #faf8f3;
+    --scale-border: #d4ccc1;
+    --scale-text: #5c4a3d;
+    --leading-bg: #d4ccc1;
+    --leading-border: #8b7355;
+    --leading-text: #3d2817;
+    --logo-color: #c9a960;
+}
+
+/* 14. Turquoise (Mint/Cyan) */
+.theme-turquoise {
+    --bg-app: #0a3d44;
+    --bg-panel: #1a5c66;
+    --bg-element: #1a5c66;
+    --bg-input: #0a3d44;
+    --bg-fretboard: linear-gradient(to bottom, #0a3d44 0%, #2a8fa3 50%, #0a3d44 100%);
+    --bg-fretboard-outer: #042531;
+    --border-dim: #3ab0c4;
+    --border-bright: #6fd4e8;
+    --border-focus: #4dd0e1;
+    --text-main: #a0f0f8;
+    --text-highlight: #e0f7fa;
+    --text-accent: #4dd0e1;
+    --text-inverse: #0a3d44;
+    --btn-bg: #00897b;
+    --btn-hover: #26a69a;
+    --btn-text: #ffffff;
+    --btn-border: #004d44;
+    --fret-wire: #4dd0e1;
+    --string-color: rgba(160, 240, 248, 0.3);
+    --nut-bg: #3ab0c4;
+    --inlay-color: #4dd0e1;
+    --root-bg: #4dd0e1;
+    --root-border: #80deea;
+    --root-text: #0a3d44;
+    --tone-bg: #00897b;
+    --tone-border: #4dd0e1;
+    --tone-text: #ffffff;
+    --scale-bg: #1a5c66;
+    --scale-border: #3ab0c4;
+    --scale-text: #80deea;
+    --leading-bg: #3ab0c4;
+    --leading-border: #4dd0e1;
+    --leading-text: #e0f7fa;
+    --logo-color: #4dd0e1;
+}
+
+/* 15. Sunburst (Orange/Yellow) */
+.theme-sunburst {
+    --bg-app: #4a2a0a;
+    --bg-panel: #7a4620;
+    --bg-element: #7a4620;
+    --bg-input: #4a2a0a;
+    --bg-fretboard: linear-gradient(to bottom, #4a2a0a 0%, #a36f29 50%, #4a2a0a 100%);
+    --bg-fretboard-outer: #2a1605;
+    --border-dim: #d4a565;
+    --border-bright: #ffc857;
+    --border-focus: #ffb84d;
+    --text-main: #ffe8b6;
+    --text-highlight: #ffffff;
+    --text-accent: #ffb84d;
+    --text-inverse: #4a2a0a;
+    --btn-bg: #f89e3c;
+    --btn-hover: #ffb84d;
+    --btn-text: #4a2a0a;
+    --btn-border: #6b3410;
+    --fret-wire: #ffc857;
+    --string-color: rgba(255, 232, 182, 0.3);
+    --nut-bg: #d4a565;
+    --inlay-color: #ffb84d;
+    --root-bg: #ffc857;
+    --root-border: #ffe599;
+    --root-text: #4a2a0a;
+    --tone-bg: #f89e3c;
+    --tone-border: #ffb84d;
+    --tone-text: #4a2a0a;
+    --scale-bg: #7a4620;
+    --scale-border: #d4a565;
+    --scale-text: #ffe8b6;
+    --leading-bg: #d4a565;
+    --leading-border: #ffb84d;
+    --leading-text: #ffffff;
+    --logo-color: #ffb84d;
+}
+
+/* 16. Eclipse (Black/White) */
+.theme-eclipse {
+    --bg-app: #1a1a1a;
+    --bg-panel: #2d2d2d;
+    --bg-element: #2d2d2d;
+    --bg-input: #1a1a1a;
+    --bg-fretboard: linear-gradient(to bottom, #1a1a1a 0%, #3d3d3d 50%, #1a1a1a 100%);
+    --bg-fretboard-outer: #0a0a0a;
+    --border-dim: #555555;
+    --border-bright: #d0d0d0;
+    --border-focus: #ffffff;
+    --text-main: #e0e0e0;
+    --text-highlight: #ffffff;
+    --text-accent: #e0e0e0;
+    --text-inverse: #1a1a1a;
+    --btn-bg: #666666;
+    --btn-hover: #888888;
+    --btn-text: #ffffff;
+    --btn-border: #444444;
+    --fret-wire: #999999;
+    --string-color: rgba(224, 224, 224, 0.3);
+    --nut-bg: #555555;
+    --inlay-color: #d0d0d0;
+    --root-bg: #ffffff;
+    --root-border: #e0e0e0;
+    --root-text: #1a1a1a;
+    --tone-bg: #888888;
+    --tone-border: #d0d0d0;
+    --tone-text: #ffffff;
+    --scale-bg: #2d2d2d;
+    --scale-border: #555555;
+    --scale-text: #d0d0d0;
+    --leading-bg: #555555;
+    --leading-border: #d0d0d0;
+    --leading-text: #ffffff;
+    --logo-color: #d0d0d0;
+}
+
+/* 17. Sapphire (Deep Blue) */
+.theme-sapphire {
+    --bg-app: #0a1929;
+    --bg-panel: #162a4a;
+    --bg-element: #162a4a;
+    --bg-input: #0a1929;
+    --bg-fretboard: linear-gradient(to bottom, #0a1929 0%, #1a3a52 50%, #0a1929 100%);
+    --bg-fretboard-outer: #040f1a;
+    --border-dim: #2b5378;
+    --border-bright: #4a9eff;
+    --border-focus: #3b82f6;
+    --text-main: #a8d5ff;
+    --text-highlight: #e3f2fd;
+    --text-accent: #3b82f6;
+    --text-inverse: #0a1929;
+    --btn-bg: #1e40af;
+    --btn-hover: #2563eb;
+    --btn-text: #ffffff;
+    --btn-border: #0c1d37;
+    --fret-wire: #4a9eff;
+    --string-color: rgba(168, 213, 255, 0.3);
+    --nut-bg: #2b5378;
+    --inlay-color: #4a9eff;
+    --root-bg: #3b82f6;
+    --root-border: #93c5fd;
+    --root-text: #ffffff;
+    --tone-bg: #1e40af;
+    --tone-border: #3b82f6;
+    --tone-text: #ffffff;
+    --scale-bg: #162a4a;
+    --scale-border: #2b5378;
+    --scale-text: #93c5fd;
+    --leading-bg: #2b5378;
+    --leading-border: #4a9eff;
+    --leading-text: #e3f2fd;
+    --logo-color: #3b82f6;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -823,6 +1089,14 @@ body:has(.top-bar.mobile-static) .page-content {
     align-items: center;
     justify-content: space-between;
     gap: 15px;
+}
+
+.controls-bar.centered {
+    justify-content: center;
+}
+
+.controls-bar.centered .filter-toggles-bar {
+    margin-left: 0;
 }
 
 /* Progression controls - left side in progression mode */
