@@ -595,29 +595,12 @@ function App() {
                             {/* Quick Actions */}
                             <div className="accordion-section quick-actions">
                                 <button className="toolbar-btn" onClick={toggleMute} title={isMuted ? "Unmute" : "Mute"}>
-                                    {isMuted ? (
-                                        <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                                            <line x1="23" y1="9" x2="17" y2="15"></line>
-                                            <line x1="17" y1="9" x2="23" y2="15"></line>
-                                        </svg>
-                                    ) : (
-                                        <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                                        </svg>
-                                    )}
+                                    <span className={`icon-mask ${isMuted ? 'icon-mute' : 'icon-volume'}`}></span>
                                 </button>
 
                                 {!showPdfOptions ? (
                                     <button className="toolbar-btn" onClick={() => setShowPdfOptions(true)} title="Export PDF">
-                                        <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                                            <polyline points="10 9 9 9 8 9"></polyline>
-                                        </svg>
+                                        <span className="icon-mask icon-pdf"></span>
                                     </button>
                                 ) : (
                                     <>
@@ -630,26 +613,23 @@ function App() {
                                             <option value="portrait">Port</option>
                                         </select>
                                         <button className="toolbar-btn" onClick={exportToPDF} title="Download">
-                                            <span style={{ fontSize: '18px' }}>⬇</span>
+                                            <span className="icon-mask icon-download"></span>
                                         </button>
                                         <button className="toolbar-btn" onClick={() => setShowPdfOptions(false)} title="Cancel">
-                                            <span style={{ fontSize: '18px' }}>✕</span>
+                                            <span className="icon-mask icon-close"></span>
                                         </button>
                                     </>
                                 )}
 
                                 <div className="input-group settings-menu-wrapper">
                                     <button className="toolbar-btn" onClick={() => setShowSettingsMenu(s => !s)} title="Settings">
-                                        <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <circle cx="12" cy="12" r="3"></circle>
-                                            <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24M19.78 19.78l-4.24-4.24m-5.08-5.08l-4.24-4.24"></path>
-                                        </svg>
+                                        <span className="icon-mask icon-settings"></span>
                                     </button>
                                     {showSettingsMenu && (
                                         <div className="settings-menu">
                                             <div className="settings-menu-section">
                                                 <div className="settings-menu-item">
-                                                    <img src="/instrument.svg" alt="Instrument" className="settings-icon" />
+                                                    <span className="icon-mask icon-instrument settings-icon"></span>
                                                     <select value={instrument} onChange={(e) => setInstrument(e.target.value)}>
                                                         <option value="guitar">Guitar</option>
                                                         <option value="bass4">Bass (4-string)</option>
@@ -671,10 +651,7 @@ function App() {
                                             </div>
                                             <div className="settings-menu-section">
                                                 <div className="settings-menu-item">
-                                                    <svg className="settings-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <circle cx="11" cy="11" r="8"></circle>
-                                                        <path d="m21 21-4.35-4.35"></path>
-                                                    </svg>
+                                                    <span className="icon-mask icon-zoom settings-icon"></span>
                                                     <div className="zoom-control">
                                                         <input type="range" min="50" max="150" value={zoom} onChange={(e) => setZoom(e.target.value)} className="zoom-slider" />
                                                         <span className="zoom-value">{zoom}%</span>
@@ -683,12 +660,7 @@ function App() {
                                             </div>
                                             <div className="settings-menu-section">
                                                 <div className="settings-menu-item">
-                                                    <svg className="settings-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <circle cx="12" cy="12" r="10"></circle>
-                                                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                                                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                                                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
-                                                    </svg>
+                                                    <span className="icon-mask icon-palette settings-icon"></span>
                                                     <select value={theme} onChange={(e) => setTheme(e.target.value)}>
                                                         <option value="default">Dark Wood</option>
                                                         <option value="theme-light-wood">Light Wood</option>
@@ -716,10 +688,7 @@ function App() {
                                             </div>
                                             <div className="settings-menu-section">
                                                 <button className="settings-menu-item reset-btn" onClick={resetFretboardSettings}>
-                                                    <svg className="settings-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                        <polyline points="23 4 23 10 17 10"></polyline>
-                                                        <path d="M20.49 15a9 9 0 1 1-2-8.94"></path>
-                                                    </svg>
+                                                    <span className="icon-mask icon-reset settings-icon"></span>
                                                     <span>Reset View</span>
                                                 </button>
                                             </div>

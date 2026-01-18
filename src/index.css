@@ -1454,6 +1454,41 @@ input[type="checkbox"] {
     mask-image: url('/reset.svg');
 }
 
+.icon-settings {
+    -webkit-mask-image: url('/settings.svg');
+    mask-image: url('/settings.svg');
+}
+
+.icon-volume {
+    -webkit-mask-image: url('/volume.svg');
+    mask-image: url('/volume.svg');
+}
+
+.icon-mute {
+    -webkit-mask-image: url('/mute.svg');
+    mask-image: url('/mute.svg');
+}
+
+.icon-pdf {
+    -webkit-mask-image: url('/pdf.svg');
+    mask-image: url('/pdf.svg');
+}
+
+.icon-download {
+    -webkit-mask-image: url('/download.svg');
+    mask-image: url('/download.svg');
+}
+
+.icon-close {
+    -webkit-mask-image: url('/close.svg');
+    mask-image: url('/close.svg');
+}
+
+.icon-instrument {
+    -webkit-mask-image: url('/instrument.svg');
+    mask-image: url('/instrument.svg');
+}
+
 /* Tray Icon Wrappers - position relative for flyout popups */
 .instrument-wrapper,
 .theme-wrapper {
@@ -1570,6 +1605,11 @@ input[type="checkbox"] {
     flex-shrink: 0;
     color: var(--text-accent);
     stroke: var(--text-accent);
+}
+
+/* Settings icon using CSS mask */
+.settings-icon.icon-mask {
+    background-color: var(--text-accent);
 }
 
 .settings-menu-item select {
