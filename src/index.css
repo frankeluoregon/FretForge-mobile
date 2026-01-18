@@ -1526,6 +1526,7 @@ input[type="checkbox"] {
 /* Settings Menu */
 .settings-menu-wrapper {
     position: relative;
+    overflow: visible;
 }
 
 .settings-menu {
@@ -2783,6 +2784,8 @@ input[type="checkbox"] {
         border-radius: 20px;
         padding: 4px 8px;
         opacity: 0.8;
+        overflow: visible;
+        z-index: 999;
     }
 
     /* Tray icons - show all */
@@ -2800,6 +2803,14 @@ input[type="checkbox"] {
         right: 0;
         left: auto;
         min-width: 130px;
+    }
+
+    /* Settings menu on mobile */
+    .settings-menu {
+        right: 0;
+        left: auto;
+        min-width: 200px;
+        max-width: 240px;
     }
 
     .toolbar-btn {
