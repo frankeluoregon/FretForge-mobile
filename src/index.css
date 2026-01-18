@@ -1049,70 +1049,70 @@ body:has(.top-bar.mobile-static) .page-content {
     color: var(--btn-text);
 }
 
-/* Primary controls wrapper - mode toggle + filter toggles */
-.primary-controls {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+/* Menu toggle button */
+.menu-toggle-btn {
+    padding: 8px 14px;
+    background: var(--bg-element);
+    color: var(--text-main);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: all 0.3s;
+    margin-left: auto;
 }
 
-/* Filter toggle buttons wrapper */
-.toggles-wrapper {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+.menu-toggle-btn:hover {
+    color: var(--text-highlight);
+    border-color: var(--text-highlight);
 }
 
-.top-row-controls {
+/* Accordion Menu */
+.accordion-menu {
+    width: 100%;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-dim);
+    padding: 12px 20px;
     display: flex;
-    gap: 15px;
-    flex: 1;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.accordion-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--bg-element);
+    border-radius: 8px;
+    border: 1px solid var(--border-dim);
+}
+
+.accordion-section.quick-actions {
+    justify-content: flex-start;
     flex-wrap: wrap;
 }
 
-.bottom-left-controls,
-.bottom-center-controls,
-.bottom-right-controls {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-/* Controls Bar - appears in both modes */
-.controls-bar {
-    width: 100%;
-    padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.2);
-    border-top: 1px solid var(--border-dim);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-}
-
-.controls-bar.centered {
+.accordion-section.filter-section {
     justify-content: center;
 }
 
-.controls-bar.centered .filter-toggles-bar {
-    margin-left: 0;
-}
-
-/* Progression controls - left side in progression mode */
-.progression-controls-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex: 1;
-}
-
-/* Filter toggles bar - right side */
-.filter-toggles-bar {
-    display: flex;
-    align-items: center;
+.accordion-section.progression-section {
+    flex-direction: column;
+    align-items: stretch;
     gap: 8px;
-    margin-left: auto;
+}
+
+.progression-section .dropdowns-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.progression-section .playback-button {
+    align-self: flex-start;
 }
 
 /* Legacy - Progression Selector Row (deprecated) */
@@ -2738,108 +2738,46 @@ input[type="checkbox"] {
         padding: 8px 10px;
     }
 
-    /* Row 1: Main header row */
+    /* Row 1: Main header row - simple flexbox */
     .top-bar-row:first-child {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        grid-template-rows: auto auto;
-        gap: 6px 10px;
-        width: 100%;
-        align-items: center;
-    }
-
-    /* Title/Logo - left side, spans both rows, dark container */
-    .app-header {
-        grid-column: 1;
-        grid-row: 1 / 3;
-        padding: 8px 14px;
-        border: 1px solid var(--border-dim);
-        background: var(--bg-element);
-        border-radius: 12px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
+        width: 100%;
+    }
+
+    /* Title/Logo - left side */
+    .app-header {
+        padding: 8px 12px;
+        border: 1px solid var(--border-dim);
+        background: var(--bg-element);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
     }
 
     /* Larger mobile logo */
     .app-logo {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
     }
 
     .app-title {
-        font-size: 1.4em;
+        font-size: 1.2em;
         font-weight: 600;
     }
 
-    /* Tray icons - top right, 80% opacity including background */
-    .top-row-controls {
-        grid-column: 2;
-        grid-row: 1;
-        display: flex;
-        align-items: center;
-        gap: 3px;
-        justify-content: flex-end;
-        background: var(--bg-element);
-        border-radius: 20px;
-        padding: 4px 8px;
-        opacity: 0.8;
-        overflow: visible;
-        z-index: 999;
-    }
-
-    /* Tray icons - show all */
-    .top-row-controls .input-group.instrument-wrapper,
-    .top-row-controls .input-group.zoom-wrapper,
-    .top-row-controls .input-group.theme-wrapper,
-    .top-row-controls .input-group.reset-wrapper,
-    .top-row-controls .input-group:has(.toolbar-btn) {
-        display: flex;
-        position: relative;
-    }
-
-    /* Tray popups on mobile */
-    .tray-popup {
-        right: 0;
-        left: auto;
-        min-width: 130px;
-    }
-
-    /* Settings menu on mobile */
-    .settings-menu {
-        right: 0;
-        left: auto;
-        min-width: 200px;
-        max-width: 240px;
-    }
-
-    .toolbar-btn {
-        width: 26px;
-        height: 26px;
-        min-width: 26px;
-        min-height: 26px;
-    }
-
-    .icon-mask {
-        width: 18px;
-        height: 18px;
-    }
-
-    .icon-guitar {
-        width: 20px;
-        height: 20px;
-    }
-
-    /* Mode toggle - below tray on right */
+    /* Mode toggle - flex grow to fill space */
     .mode-toggle {
-        grid-column: 2;
-        grid-row: 2;
         display: flex;
         gap: 0;
-        justify-content: flex-end;
         background: var(--bg-element);
         border-radius: 6px;
         overflow: hidden;
+        flex: 1;
+        max-width: 200px;
     }
 
     .mode-btn {
@@ -2854,13 +2792,15 @@ input[type="checkbox"] {
         background: var(--btn-bg);
     }
 
-    /* Hide primary-controls wrapper, toggles-wrapper on mobile - they're now in controls-bar */
-    .primary-controls {
-        display: contents;
-    }
-
-    .toggles-wrapper {
-        display: none;
+    /* Menu toggle button - right side */
+    .menu-toggle-btn {
+        padding: 6px 12px;
+        font-size: 0.95em;
+        min-height: 28px;
+        background: var(--bg-element);
+        border: 1px solid var(--border-dim);
+        border-radius: 6px;
+        flex-shrink: 0;
     }
 
     /* Hide the entire bottom row on mobile */
@@ -2868,45 +2808,38 @@ input[type="checkbox"] {
         display: none;
     }
 
-    /* Controls bar - mobile layout */
-    .controls-bar {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+    /* Accordion menu - mobile layout */
+    .accordion-menu {
+        padding: 8px 12px;
         gap: 8px;
+    }
+
+    .accordion-section {
         padding: 8px 10px;
-        background: rgba(0, 0, 0, 0.15);
-        border-top: 1px solid var(--border-dim);
-        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .accordion-section.quick-actions {
         justify-content: center;
     }
 
-    /* When progression controls are present, use space-between */
-    .controls-bar:has(.progression-controls-left) {
-        justify-content: space-between;
+    .accordion-section.filter-section {
+        justify-content: center;
     }
 
-    /* Progression controls on the left in progression mode */
-    .progression-controls-left {
-        display: flex;
-        flex-wrap: wrap;
+    .accordion-section.progression-section {
         gap: 6px;
-        align-items: center;
-        flex: 1;
     }
 
-    .progression-controls-left .input-group {
-        flex: 0 0 auto;
-    }
-
-    .progression-controls-left .input-group select {
+    .progression-section .input-group select {
         height: 32px;
         padding: 4px 8px;
         font-size: 0.8em;
         min-height: 32px;
     }
 
-    .progression-controls-left .progression-select {
+    .progression-section .progression-select {
         flex: 1;
         min-width: 100px;
         max-width: 180px;
@@ -2915,28 +2848,16 @@ input[type="checkbox"] {
         min-height: 32px;
     }
 
-    .progression-controls-left .playback-button {
+    .progression-section .playback-button {
         padding: 4px 10px;
         font-size: 0.75em;
         min-height: 32px;
     }
 
-    /* Filter toggles bar on the right */
-    .filter-toggles-bar {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        flex-shrink: 0;
-    }
-
-    /* Center filter toggles when no progression controls */
-    .controls-bar:not(:has(.progression-controls-left)) .filter-toggles-bar {
-        margin-left: 0;
-    }
-
-    .filter-toggles-bar .filter-toggle-btn {
-        padding: 5px 10px;
-        font-size: 0.75em;
+    /* Filter toggle button sizing */
+    .filter-toggle-btn {
+        padding: 6px 12px;
+        font-size: 0.8em;
         min-height: 32px;
     }
 
