@@ -606,7 +606,11 @@ function App() {
                             {/* Instrument Icon with Flyout */}
                             <div className="input-group instrument-wrapper">
                                 <button className="toolbar-btn" onClick={() => setShowInstrumentPopup(s => !s)} title="Instrument">
-                                    <span className="icon-mask icon-guitar"></span>
+                                    <svg className="control-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                                        <circle cx="12" cy="12" r="2.5"/>
+                                        <path d="M12 6v3m0 6v3m-6-6h3m6 0h3"/>
+                                    </svg>
                                 </button>
                                 {showInstrumentPopup && (
                                     <div className="tray-popup instrument-popup">
@@ -632,7 +636,10 @@ function App() {
                             {/* Zoom Icon with Flyout */}
                             <div className="input-group zoom-wrapper">
                                 <button className="toolbar-btn" onClick={() => setShowZoomPopup(s => !s)} title="Zoom">
-                                    <span className="icon-mask icon-zoom"></span>
+                                    <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <path d="m21 21-4.35-4.35"></path>
+                                    </svg>
                                 </button>
                                 {showZoomPopup && (
                                     <div className="tray-popup zoom-popup">
@@ -652,7 +659,12 @@ function App() {
                             {/* Theme/Palette Icon with Flyout */}
                             <div className="input-group theme-wrapper">
                                 <button className="toolbar-btn" onClick={() => setShowThemePopup(s => !s)} title="Theme">
-                                    <span className="icon-mask icon-palette"></span>
+                                    <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                                    </svg>
                                 </button>
                                 {showThemePopup && (
                                     <div className="tray-popup theme-popup">
@@ -723,7 +735,10 @@ function App() {
                             </div>
                             <div className="input-group reset-wrapper">
                                 <button className="toolbar-btn" onClick={resetSettings} title="Reset Settings">
-                                    <span className="icon-mask icon-reset"></span>
+                                    <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <path d="M20.49 15a9 9 0 1 1-2-8.94"></path>
+                                    </svg>
                                 </button>
                             </div>
                         </div>

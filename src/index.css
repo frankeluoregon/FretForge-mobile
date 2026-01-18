@@ -2538,6 +2538,11 @@ input[type="checkbox"] {
         flex-shrink: 0;
     }
 
+    /* Center filter toggles when no progression controls */
+    .controls-bar:not(:has(.progression-controls-left)) .filter-toggles-bar {
+        margin-left: 0;
+    }
+
     .filter-toggles-bar .filter-toggle-btn {
         padding: 5px 10px;
         font-size: 0.75em;
