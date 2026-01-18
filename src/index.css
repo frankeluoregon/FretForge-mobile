@@ -1523,6 +1523,112 @@ input[type="checkbox"] {
     border-color: var(--border-focus);
 }
 
+/* Settings Menu */
+.settings-menu-wrapper {
+    position: relative;
+}
+
+.settings-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-dim);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    z-index: 1001;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.settings-menu-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-dim);
+}
+
+.settings-menu-section:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.settings-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--text-accent);
+    stroke: var(--text-accent);
+}
+
+.settings-menu-item select {
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 0.85em;
+    background: var(--bg-input);
+    color: var(--text-main);
+    border: 1px solid var(--border-dim);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.settings-menu-item select:focus {
+    border-color: var(--border-focus);
+    outline: none;
+}
+
+.zoom-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+
+.zoom-slider {
+    flex: 1;
+    height: 4px;
+    cursor: pointer;
+}
+
+.zoom-value {
+    font-size: 0.75em;
+    min-width: 32px;
+    text-align: right;
+    color: var(--text-accent);
+}
+
+.reset-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    border: 1px solid var(--btn-border);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 500;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.reset-btn:hover {
+    background: var(--btn-hover);
+    transform: translateY(-1px);
+}
+
 .export-btn {
     padding: 6px 16px;
     background: var(--btn-bg);

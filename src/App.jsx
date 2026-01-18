@@ -71,9 +71,7 @@ function App() {
     const [isMuted, setIsMuted] = useState(false);
     const [pdfOrientation, setPdfOrientation] = useState('landscape');
     const [showPdfOptions, setShowPdfOptions] = useState(false);
-    const [showZoomPopup, setShowZoomPopup] = useState(false);
-    const [showInstrumentPopup, setShowInstrumentPopup] = useState(false);
-    const [showThemePopup, setShowThemePopup] = useState(false);
+    const [showSettingsMenu, setShowSettingsMenu] = useState(false);
 
     // Progression State
     const [progKey, setProgKey] = useState(savedSettings.progKey || 'C');
@@ -329,10 +327,11 @@ function App() {
         if (mode === 'arpeggio') MIDIPlayer.playChordArpeggio(chord, instrument, currentTuning);
     };
 
-    const resetSettings = () => {
-        if (window.confirm('Reset all settings and chords to default?')) {
-            localStorage.removeItem('fretforge_settings');
-            window.location.reload();
+    const resetFretboardSettings = () => {
+        if (window.confirm('Reset fretboard view settings to default?')) {
+            setNumFrets(window.innerWidth > window.innerHeight ? 12 : 5);
+            setZoom(100);
+            setChords(mode === 'progression' ? (savedSettings.progressionChords || DEFAULT_CHORDS) : DEFAULT_CHORDS);
         }
     };
 
@@ -603,97 +602,7 @@ function App() {
                         </div>
 
                         <div className="top-row-controls">
-                            {/* Instrument Icon with Flyout */}
-                            <div className="input-group instrument-wrapper">
-                                <button className="toolbar-btn" onClick={() => setShowInstrumentPopup(s => !s)} title="Instrument">
-                                    <svg className="control-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                                        <circle cx="12" cy="12" r="2.5"/>
-                                        <path d="M12 6v3m0 6v3m-6-6h3m6 0h3"/>
-                                    </svg>
-                                </button>
-                                {showInstrumentPopup && (
-                                    <div className="tray-popup instrument-popup">
-                                        <select value={instrument} onChange={(e) => { setInstrument(e.target.value); setShowInstrumentPopup(false); }}>
-                                            <option value="guitar">Guitar</option>
-                                            <option value="bass4">Bass (4-string)</option>
-                                            <option value="bass5">Bass (5-string)</option>
-                                            <option value="bass6">Bass (6-string)</option>
-                                            <option value="ukulele">Ukulele</option>
-                                            <option value="mandolin">Mandolin</option>
-                                        </select>
-                                        {instrument === 'guitar' && (
-                                            <select value={guitarTuning} onChange={(e) => { setGuitarTuning(e.target.value); setShowInstrumentPopup(false); }}>
-                                                <option value="standard">Standard</option>
-                                                <option value="dropD">Drop D</option>
-                                                <option value="dadgad">DADGAD</option>
-                                            </select>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Zoom Icon with Flyout */}
-                            <div className="input-group zoom-wrapper">
-                                <button className="toolbar-btn" onClick={() => setShowZoomPopup(s => !s)} title="Zoom">
-                                    <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="11" cy="11" r="8"></circle>
-                                        <path d="m21 21-4.35-4.35"></path>
-                                    </svg>
-                                </button>
-                                {showZoomPopup && (
-                                    <div className="tray-popup zoom-popup">
-                                        <span className="zoom-label">{zoom}%</span>
-                                        <input
-                                            type="range"
-                                            min="50"
-                                            max="150"
-                                            value={zoom}
-                                            onChange={(e) => setZoom(e.target.value)}
-                                            className="zoom-slider-popup"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Theme/Palette Icon with Flyout */}
-                            <div className="input-group theme-wrapper">
-                                <button className="toolbar-btn" onClick={() => setShowThemePopup(s => !s)} title="Theme">
-                                    <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                                        <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                                        <line x1="15" y1="9" x2="15.01" y2="9"></line>
-                                    </svg>
-                                </button>
-                                {showThemePopup && (
-                                    <div className="tray-popup theme-popup">
-                                        <select className="theme-select" onChange={(e) => { setTheme(e.target.value); setShowThemePopup(false); }} value={theme}>
-                                            <option value="default">Dark Wood</option>
-                                            <option value="theme-light-wood">Light Wood</option>
-                                            <option value="theme-light">Light</option>
-                                            <option value="theme-high-contrast">High Contrast</option>
-                                            <option value="theme-midnight">Midnight</option>
-                                            <option value="theme-paper">Paper</option>
-                                            <option value="theme-terminal">Terminal</option>
-                                            <option value="theme-oceanic">Oceanic</option>
-                                            <option value="theme-sunset">Sunset</option>
-                                            <option value="theme-slate">Slate</option>
-                                            <option value="theme-navy">Navy</option>
-                                            <option value="theme-berry">Berry</option>
-                                            <option value="theme-forest">Forest</option>
-                                            <option value="theme-vaporwave">Vaporwave</option>
-                                            <option value="theme-ruby">Ruby</option>
-                                            <option value="theme-magenta">Magenta</option>
-                                            <option value="theme-ivory">Ivory</option>
-                                            <option value="theme-turquoise">Turquoise</option>
-                                            <option value="theme-sunburst">Sunburst</option>
-                                            <option value="theme-eclipse">Eclipse</option>
-                                            <option value="theme-sapphire">Sapphire</option>
-                                        </select>
-                                    </div>
-                                )}
-                            </div>
+                            {/* Mute Button */}
                             <div className="input-group">
                                 <button className="toolbar-btn" onClick={toggleMute} title={isMuted ? "Unmute" : "Mute"}>
                                     {isMuted ? (
@@ -710,6 +619,8 @@ function App() {
                                     )}
                                 </button>
                             </div>
+
+                            {/* PDF Export Button */}
                             <div className="input-group">
                                 {!showPdfOptions ? (
                                     <button className="toolbar-btn" onClick={() => setShowPdfOptions(true)} title="Export PDF">
@@ -723,9 +634,9 @@ function App() {
                                     </button>
                                 ) : (
                                     <div className="toolbar-group">
-                                        <select 
+                                        <select
                                             className="pdf-select"
-                                            value={pdfOrientation} 
+                                            value={pdfOrientation}
                                             onChange={(e) => setPdfOrientation(e.target.value)}
                                         >
                                             <option value="landscape">Land</option>
@@ -740,13 +651,95 @@ function App() {
                                     </div>
                                 )}
                             </div>
-                            <div className="input-group reset-wrapper">
-                                <button className="toolbar-btn" onClick={resetSettings} title="Reset Settings">
+
+                            {/* Settings Menu Button */}
+                            <div className="input-group settings-menu-wrapper">
+                                <button className="toolbar-btn" onClick={() => setShowSettingsMenu(s => !s)} title="Settings">
                                     <svg className="control-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <polyline points="23 4 23 10 17 10"></polyline>
-                                        <path d="M20.49 15a9 9 0 1 1-2-8.94"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m5.08 5.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m5.08-5.08l4.24-4.24M19.78 19.78l-4.24-4.24m-5.08-5.08l-4.24-4.24"></path>
                                     </svg>
                                 </button>
+                                {showSettingsMenu && (
+                                    <div className="settings-menu">
+                                        <div className="settings-menu-section">
+                                            <div className="settings-menu-item">
+                                                <img src="/instrument.svg" alt="Instrument" className="settings-icon" />
+                                                <select value={instrument} onChange={(e) => setInstrument(e.target.value)}>
+                                                    <option value="guitar">Guitar</option>
+                                                    <option value="bass4">Bass (4-string)</option>
+                                                    <option value="bass5">Bass (5-string)</option>
+                                                    <option value="bass6">Bass (6-string)</option>
+                                                    <option value="ukulele">Ukulele</option>
+                                                    <option value="mandolin">Mandolin</option>
+                                                </select>
+                                            </div>
+                                            {instrument === 'guitar' && (
+                                                <div className="settings-menu-item">
+                                                    <select value={guitarTuning} onChange={(e) => setGuitarTuning(e.target.value)}>
+                                                        <option value="standard">Standard</option>
+                                                        <option value="dropD">Drop D</option>
+                                                        <option value="dadgad">DADGAD</option>
+                                                    </select>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="settings-menu-section">
+                                            <div className="settings-menu-item">
+                                                <svg className="settings-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <circle cx="11" cy="11" r="8"></circle>
+                                                    <path d="m21 21-4.35-4.35"></path>
+                                                </svg>
+                                                <div className="zoom-control">
+                                                    <input type="range" min="50" max="150" value={zoom} onChange={(e) => setZoom(e.target.value)} className="zoom-slider" />
+                                                    <span className="zoom-value">{zoom}%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="settings-menu-section">
+                                            <div className="settings-menu-item">
+                                                <svg className="settings-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                                                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                                                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                                                </svg>
+                                                <select value={theme} onChange={(e) => setTheme(e.target.value)}>
+                                                    <option value="default">Dark Wood</option>
+                                                    <option value="theme-light-wood">Light Wood</option>
+                                                    <option value="theme-light">Light</option>
+                                                    <option value="theme-high-contrast">High Contrast</option>
+                                                    <option value="theme-midnight">Midnight</option>
+                                                    <option value="theme-paper">Paper</option>
+                                                    <option value="theme-terminal">Terminal</option>
+                                                    <option value="theme-oceanic">Oceanic</option>
+                                                    <option value="theme-sunset">Sunset</option>
+                                                    <option value="theme-slate">Slate</option>
+                                                    <option value="theme-navy">Navy</option>
+                                                    <option value="theme-berry">Berry</option>
+                                                    <option value="theme-forest">Forest</option>
+                                                    <option value="theme-vaporwave">Vaporwave</option>
+                                                    <option value="theme-ruby">Ruby</option>
+                                                    <option value="theme-magenta">Magenta</option>
+                                                    <option value="theme-ivory">Ivory</option>
+                                                    <option value="theme-turquoise">Turquoise</option>
+                                                    <option value="theme-sunburst">Sunburst</option>
+                                                    <option value="theme-eclipse">Eclipse</option>
+                                                    <option value="theme-sapphire">Sapphire</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="settings-menu-section">
+                                            <button className="settings-menu-item reset-btn" onClick={resetFretboardSettings}>
+                                                <svg className="settings-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                                    <path d="M20.49 15a9 9 0 1 1-2-8.94"></path>
+                                                </svg>
+                                                <span>Reset View</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
