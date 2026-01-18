@@ -98,11 +98,12 @@ const Fretboard = ({
                                     )}
 
                                     {/* Fret Numbers and Inlays (only on last string) */}
-                                    {stringIndex === tuning.length - 1 && fret > 0 && (
+                                    {stringIndex === tuning.length - 1 && (
                                         <>
-                                            <div className="fret-number">{fret}</div>
-                                            {[3, 5, 7, 9, 15, 17].includes(fret) && <div className="fret-inlay" />}
-                                            {[12, 24].includes(fret) && (
+                                            {fret === 0 && <div className="fret-number">O</div>}
+                                            {fret > 0 && <div className="fret-number">{fret}</div>}
+                                            {fret > 0 && [3, 5, 7, 9, 15, 17].includes(fret) && <div className="fret-inlay" />}
+                                            {fret > 0 && [12, 24].includes(fret) && (
                                                 <><div className="fret-inlay" style={{left: '30%'}} /><div className="fret-inlay" style={{left: '60%'}} /></>
                                             )}
                                         </>
