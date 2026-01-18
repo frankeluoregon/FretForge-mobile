@@ -192,24 +192,21 @@ function App() {
         };
     }, []);
 
-    // Effect to close popups on outside click
+    // Effect to close menus on outside click
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (showZoomPopup && !event.target.closest('.zoom-wrapper')) {
-                setShowZoomPopup(false);
+            if (showSettingsMenu && !event.target.closest('.settings-menu-wrapper')) {
+                setShowSettingsMenu(false);
             }
-            if (showInstrumentPopup && !event.target.closest('.instrument-wrapper')) {
-                setShowInstrumentPopup(false);
-            }
-            if (showThemePopup && !event.target.closest('.theme-wrapper')) {
-                setShowThemePopup(false);
+            if (showPdfOptions && !event.target.closest('.input-group:has(.pdf-select)')) {
+                setShowPdfOptions(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [showZoomPopup, showInstrumentPopup, showThemePopup]);
+    }, [showSettingsMenu, showPdfOptions]);
 
     // Dynamic Body Padding for Fixed Header
     useEffect(() => {
