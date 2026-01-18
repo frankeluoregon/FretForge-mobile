@@ -1734,8 +1734,8 @@ input[type="checkbox"] {
 }
 
 .icon-instrument {
-    -webkit-mask-image: url('/instrument.svg');
-    mask-image: url('/instrument.svg');
+    -webkit-mask-image: url('/guitar.svg');
+    mask-image: url('/guitar.svg');
 }
 
 .icon-scale {
@@ -1744,8 +1744,8 @@ input[type="checkbox"] {
 }
 
 .icon-leading {
-    -webkit-mask-image: url('/leading.svg');
-    mask-image: url('/leading.svg');
+    -webkit-mask-image: url('/lead.svg');
+    mask-image: url('/lead.svg');
 }
 
 /* Tray Icon Wrappers - position relative for flyout popups */
