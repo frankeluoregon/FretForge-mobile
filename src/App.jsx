@@ -695,32 +695,33 @@ function App() {
                                 <div className="utility-panel-content theme-panel">
                                     <div className="theme-grid">
                                         {[
-                                            { value: 'default', name: 'Dark Wood' },
-                                            { value: 'theme-light-wood', name: 'Light Wood' },
-                                            { value: 'theme-light', name: 'Light' },
-                                            { value: 'theme-high-contrast', name: 'High Contrast' },
-                                            { value: 'theme-midnight', name: 'Midnight' },
-                                            { value: 'theme-paper', name: 'Paper' },
-                                            { value: 'theme-terminal', name: 'Terminal' },
-                                            { value: 'theme-oceanic', name: 'Oceanic' },
-                                            { value: 'theme-sunset', name: 'Sunset' },
-                                            { value: 'theme-slate', name: 'Slate' },
-                                            { value: 'theme-navy', name: 'Navy' },
-                                            { value: 'theme-berry', name: 'Berry' },
-                                            { value: 'theme-forest', name: 'Forest' },
-                                            { value: 'theme-vaporwave', name: 'Vaporwave' },
-                                            { value: 'theme-ruby', name: 'Ruby' },
-                                            { value: 'theme-magenta', name: 'Magenta' },
-                                            { value: 'theme-ivory', name: 'Ivory' },
-                                            { value: 'theme-turquoise', name: 'Turquoise' },
-                                            { value: 'theme-sunburst', name: 'Sunburst' },
-                                            { value: 'theme-eclipse', name: 'Eclipse' },
-                                            { value: 'theme-sapphire', name: 'Sapphire' },
+                                            { value: 'default', name: 'Dark Wood', bg: '#3a2a1a', text: '#d4c4a8' },
+                                            { value: 'theme-light-wood', name: 'Light Wood', bg: '#c4a77d', text: '#2c1810' },
+                                            { value: 'theme-light', name: 'Light', bg: '#f5f5f5', text: '#333333' },
+                                            { value: 'theme-high-contrast', name: 'High Contrast', bg: '#000000', text: '#ffff00' },
+                                            { value: 'theme-midnight', name: 'Midnight', bg: '#1a1a2e', text: '#a0a0cc' },
+                                            { value: 'theme-paper', name: 'Paper', bg: '#f8f4e8', text: '#4a4a4a' },
+                                            { value: 'theme-terminal', name: 'Terminal', bg: '#0a0a0a', text: '#00ff00' },
+                                            { value: 'theme-oceanic', name: 'Oceanic', bg: '#1a3a4a', text: '#7ec8e3' },
+                                            { value: 'theme-sunset', name: 'Sunset', bg: '#2d1b4e', text: '#ff9966' },
+                                            { value: 'theme-slate', name: 'Slate', bg: '#2d3748', text: '#a0aec0' },
+                                            { value: 'theme-navy', name: 'Navy', bg: '#0a1628', text: '#64b5f6' },
+                                            { value: 'theme-berry', name: 'Berry', bg: '#2d1a2d', text: '#e879a9' },
+                                            { value: 'theme-forest', name: 'Forest', bg: '#0d2e0d', text: '#4caf50' },
+                                            { value: 'theme-vaporwave', name: 'Vaporwave', bg: '#09090b', text: '#f472b6' },
+                                            { value: 'theme-ruby', name: 'Ruby', bg: '#5c1515', text: '#ff4444' },
+                                            { value: 'theme-magenta', name: 'Magenta', bg: '#6b2477', text: '#ff44ff' },
+                                            { value: 'theme-ivory', name: 'Ivory', bg: '#f5f1e8', text: '#5d4e37' },
+                                            { value: 'theme-turquoise', name: 'Turquoise', bg: '#1a5c66', text: '#4dd0e1' },
+                                            { value: 'theme-sunburst', name: 'Sunburst', bg: '#4a2a0a', text: '#ffa500' },
+                                            { value: 'theme-eclipse', name: 'Eclipse', bg: '#1a1a2a', text: '#9090c0' },
+                                            { value: 'theme-sapphire', name: 'Sapphire', bg: '#162a4a', text: '#4a9eff' },
                                         ].map(t => (
                                             <button
                                                 key={t.value}
                                                 className={`theme-btn ${theme === t.value ? 'active' : ''}`}
                                                 onClick={() => setTheme(t.value)}
+                                                style={{ backgroundColor: t.bg, color: t.text, borderColor: t.text }}
                                             >
                                                 {t.name}
                                             </button>

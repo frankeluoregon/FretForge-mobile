@@ -598,10 +598,10 @@
     --bg-fretboard-outer: #0d0a08;
     --border-dim: #1b4d1b;
     --border-bright: #4caf50;
-    --border-focus: #a78bfa;
+    --border-focus: #8d6e63;
     --text-main: #a5d6a7;
     --text-highlight: #e8f5e9;
-    --text-accent: #a78bfa;
+    --text-accent: #8d6e63;
     --text-inverse: #051a05;
     --btn-bg: #2e7d32;
     --btn-hover: #388e3c;
@@ -610,18 +610,18 @@
     --fret-wire: #8d6e63;
     --string-color: rgba(165, 214, 167, 0.3);
     --nut-bg: #1b4d1b;
-    --inlay-color: #a78bfa;
+    --inlay-color: #8d6e63;
     --root-bg: #4caf50;
     --root-border: #81c784;
     --root-text: #051a05;
-    --tone-bg: #a78bfa;
-    --tone-border: #7c3aed;
-    --tone-text: #051a05;
+    --tone-bg: #a1887f;
+    --tone-border: #6d4c41;
+    --tone-text: #ffffff;
     --scale-bg: #0d2e0d;
     --scale-border: #1b4d1b;
     --scale-text: #66bb6a;
-    --leading-bg: #c4b5fd;
-    --leading-border: #a78bfa;
+    --leading-bg: #5d9ecf;
+    --leading-border: #3d7ea9;
     --leading-text: #051a05;
     --logo-color: #4caf50;
 }
@@ -674,10 +674,10 @@
     --bg-fretboard-outer: #220505;
     --border-dim: #a02020;
     --border-bright: #ff4444;
-    --border-focus: #ffb347;
+    --border-focus: #cc8030;
     --text-main: #ffcccc;
     --text-highlight: #ffffff;
-    --text-accent: #ffb347;
+    --text-accent: #cc8030;
     --text-inverse: #3d0a0a;
     --btn-bg: #c41e3a;
     --btn-hover: #e63946;
@@ -686,23 +686,23 @@
     --fret-wire: #ff8888;
     --string-color: rgba(255, 204, 204, 0.3);
     --nut-bg: #a02020;
-    --inlay-color: #ffb347;
+    --inlay-color: #cc8030;
     --root-bg: #ff4444;
     --root-border: #ff8888;
     --root-text: #ffffff;
-    --tone-bg: #ffb347;
-    --tone-border: #cc8030;
-    --tone-text: #3d0a0a;
+    --tone-bg: #b8860b;
+    --tone-border: #8b6914;
+    --tone-text: #ffffff;
     --scale-bg: #5c1515;
     --scale-border: #a02020;
     --scale-text: #ff8888;
-    --leading-bg: #ffd699;
-    --leading-border: #ffb347;
+    --leading-bg: #daa520;
+    --leading-border: #b8860b;
     --leading-text: #3d0a0a;
     --logo-color: #ff6666;
 }
 
-/* 12. Magenta (Hot Pink) - with teal/cyan accents */
+/* 12. Magenta (Hot Pink) - with darker teal accents */
 .theme-magenta {
     --bg-app: #4a1555;
     --bg-panel: #6b2477;
@@ -712,10 +712,10 @@
     --bg-fretboard-outer: #2a0838;
     --border-dim: #c64fc6;
     --border-bright: #ff44ff;
-    --border-focus: #22d3ee;
+    --border-focus: #0891b2;
     --text-main: #ffccff;
     --text-highlight: #ffffff;
-    --text-accent: #22d3ee;
+    --text-accent: #0891b2;
     --text-inverse: #4a1555;
     --btn-bg: #c926c9;
     --btn-hover: #e946e9;
@@ -724,19 +724,19 @@
     --fret-wire: #ff88ff;
     --string-color: rgba(255, 204, 255, 0.3);
     --nut-bg: #c64fc6;
-    --inlay-color: #22d3ee;
+    --inlay-color: #0891b2;
     --root-bg: #ff44ff;
     --root-border: #ff88ff;
     --root-text: #ffffff;
-    --tone-bg: #22d3ee;
-    --tone-border: #0891b2;
-    --tone-text: #4a1555;
+    --tone-bg: #0e7490;
+    --tone-border: #065666;
+    --tone-text: #ffffff;
     --scale-bg: #6b2477;
     --scale-border: #c64fc6;
     --scale-text: #ff88ff;
-    --leading-bg: #67e8f9;
-    --leading-border: #22d3ee;
-    --leading-text: #4a1555;
+    --leading-bg: #14b8a6;
+    --leading-border: #0d9488;
+    --leading-text: #ffffff;
     --logo-color: #ff66ff;
 }
 
@@ -1203,25 +1203,24 @@ body:has(.top-bar.mobile-static) .page-content {
 
 .theme-btn {
     padding: 8px 12px;
-    background: var(--bg-input);
-    color: var(--text-main);
-    border: 2px solid var(--border-dim);
+    border: 2px solid;
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.8em;
+    font-weight: 500;
     transition: all 0.2s;
     text-align: center;
 }
 
 .theme-btn:hover {
-    border-color: var(--border-bright);
-    background: rgba(255, 255, 255, 0.05);
+    filter: brightness(1.2);
+    transform: scale(1.02);
 }
 
 .theme-btn.active {
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    border-color: var(--btn-border);
+    outline: 3px solid var(--text-highlight);
+    outline-offset: 2px;
+    transform: scale(1.05);
 }
 
 /* Zoom Panel */
