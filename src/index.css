@@ -1487,6 +1487,10 @@ input[type="checkbox"] {
     cursor: pointer;
     transition: all 0.3s;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .export-btn:hover {
@@ -1496,6 +1500,40 @@ input[type="checkbox"] {
 
 .export-btn:active {
     transform: translateY(0);
+}
+
+/* Orientation Buttons */
+.orientation-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.orientation-btns button {
+    padding: 8px 16px;
+    background: var(--bg-element);
+    color: var(--text-muted);
+    border: 2px solid var(--border-dim);
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+
+.orientation-btns button:hover {
+    background: var(--bg-hover);
+    border-color: var(--border-focus);
+}
+
+.orientation-btns button.active {
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    border-color: var(--btn-border);
+}
+
+.orientation-btns button.active:hover {
+    background: var(--btn-hover);
 }
 
 /* Filter Toggle Buttons - Scale Notes, Leading Notes */

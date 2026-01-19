@@ -773,11 +773,11 @@ function App() {
                                                 Portrait
                                             </button>
                                         </div>
+                                        <button className="export-btn" onClick={() => { exportToPDF(); setActiveUtilityPanel(null); }}>
+                                            <span className="icon-mask icon-download"></span>
+                                            Export PDF
+                                        </button>
                                     </div>
-                                    <button className="export-btn" onClick={() => { exportToPDF(); setActiveUtilityPanel(null); }}>
-                                        <span className="icon-mask icon-download"></span>
-                                        Export PDF
-                                    </button>
                                 </div>
                             )}
                         </div>
