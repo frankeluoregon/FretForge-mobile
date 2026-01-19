@@ -619,7 +619,7 @@ function App() {
 
                         {/* Mute Toggle */}
                         <button
-                            className={`utility-btn utility-toggle ${isMuted ? 'off' : ''}`}
+                            className={`utility-btn ${isMuted ? 'utility-toggle off' : ''}`}
                             onClick={toggleMute}
                             title={isMuted ? "Sound is muted" : "Sound is on"}
                         >
