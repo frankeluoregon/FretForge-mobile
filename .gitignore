@@ -3,3 +3,38 @@
 
 # Claude settings
 .claude/settings.local.json
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+
+# Android build artifacts
+android/.gradle/
+android/.idea/
+android/app/build/
+android/build/
+android/local.properties
+*.apk
+*.aab
+
+# iOS build artifacts (if applicable)
+ios/App/Pods/
+ios/App/build/
+
+# Capacitor
+capacitor-cordova-android-plugins/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db

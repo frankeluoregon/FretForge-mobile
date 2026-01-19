@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FretForge</string>
+    <string name="title_activity_main">FretForge</string>
+    <string name="package_name">app.fretforge.android</string>
+    <string name="custom_url_scheme">app.fretforge.android</string>
+</resources>

@@ -1263,6 +1263,31 @@ input[type="checkbox"] {
     border-color: var(--border-focus);
 }
 
+/* Theme Grid - grid layout for theme selection */
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+}
+
+.theme-grid .theme-btn {
+    padding: 8px 4px;
+    font-size: 0.75em;
+    border-radius: 6px;
+    border-width: 2px;
+    min-height: 40px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.theme-grid .theme-btn.active {
+    border-width: 3px;
+    font-weight: 700;
+}
+
 /* Progression Controls - below utility bar in progression mode */
 .progression-controls {
     display: flex;
@@ -1320,13 +1345,6 @@ input[type="checkbox"] {
     mask-repeat: no-repeat;
     -webkit-mask-position: center;
     mask-position: center;
-}
-
-.icon-guitar {
-    -webkit-mask-image: url('/guitaricon.svg');
-    mask-image: url('/guitaricon.svg');
-    width: 24px;
-    height: 24px;
 }
 
 .icon-instrument {
@@ -2320,31 +2338,32 @@ body:has(#fretboard-page.active) .legend .leading-note-legend {
     background: var(--bg-panel);
     border: 1px solid var(--border-dim);
     border-radius: 8px;
-    padding: 8px;
+    padding: 12px;
     display: none;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 160px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    min-width: 280px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     z-index: 2000;
 }
 
 .theme-menu.visible {
-    display: flex;
+    display: grid;
 }
 
 .theme-option {
-    padding: 8px 12px;
+    padding: 8px 6px;
     background: transparent;
-    border: none;
+    border: 2px solid transparent;
     color: var(--text-main);
-    text-align: left;
+    text-align: center;
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 0.9em;
+    border-radius: 6px;
+    font-size: 0.75em;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
 }
 
 .theme-option:hover {
@@ -2353,15 +2372,16 @@ body:has(#fretboard-page.active) .legend .leading-note-legend {
 }
 
 .theme-option.active {
+    border-color: var(--btn-border);
     background: var(--btn-bg);
     color: var(--btn-text);
 }
 
 .theme-swatch {
-    width: 12px;
-    height: 12px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    border: 1px solid var(--text-main);
+    border: 2px solid var(--text-main);
 }
 
 /* ========================================
@@ -2638,14 +2658,19 @@ input[type="checkbox"] {
         min-height: 26px;
     }
 
+    .toolbar-btn svg {
+        width: 23px;
+        height: 23px;
+    }
+
     .icon-mask {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
     }
 
     .icon-guitar {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
 
     /* Mode toggle - below tray on right */
@@ -2968,8 +2993,8 @@ input[type="checkbox"] {
     }
 
     .utility-btn .icon-mask {
-        width: 22px;
-        height: 22px;
+        width: 20px;
+        height: 20px;
     }
 
     .utility-btn .utility-label {

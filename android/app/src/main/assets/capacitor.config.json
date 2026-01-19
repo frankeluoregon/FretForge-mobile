@@ -1,5 +1,8 @@
 {
 	"appId": "app.fretforge.android",
-	"appName": "fretforge",
-	"webDir": "dist"
+	"appName": "FretForge",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	}
 }
