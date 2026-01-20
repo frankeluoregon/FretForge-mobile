@@ -9,7 +9,12 @@ export const Progressions = {
             'IV': { degree: 3, type: 'major', mode: 'lydian', seventh: 'major7' },
             'V': { degree: 4, type: 'major', mode: 'mixolydian', seventh: 'dominant7' },
             'vi': { degree: 5, type: 'minor', mode: 'aeolian', seventh: 'minor7' },
-            'vii°': { degree: 6, type: 'diminished', mode: 'locrian', seventh: 'diminished' }
+            'vii°': { degree: 6, type: 'diminished', mode: 'locrian', seventh: 'diminished' },
+            // Borrowed chords from parallel minor
+            'III': { degree: 2, type: 'major', mode: 'ionian', seventh: 'major7' },
+            'iv': { degree: 3, type: 'minor', mode: 'dorian', seventh: 'minor7' },
+            'VI': { degree: 5, type: 'major', mode: 'lydian', seventh: 'major7' },
+            'VII': { degree: 6, type: 'major', mode: 'mixolydian', seventh: 'dominant7' }
         },
         minor: {
             'i': { degree: 0, type: 'minor', mode: 'aeolian', seventh: 'minor7' },
@@ -17,8 +22,12 @@ export const Progressions = {
             'III': { degree: 2, type: 'major', mode: 'ionian', seventh: 'major7' },
             'iv': { degree: 3, type: 'minor', mode: 'dorian', seventh: 'minor7' },
             'v': { degree: 4, type: 'minor', mode: 'phrygian', seventh: 'minor7' },
+            'V': { degree: 4, type: 'major', mode: 'mixolydian', seventh: 'dominant7' },
             'VI': { degree: 5, type: 'major', mode: 'lydian', seventh: 'major7' },
-            'VII': { degree: 6, type: 'major', mode: 'mixolydian', seventh: 'dominant7' }
+            'VII': { degree: 6, type: 'major', mode: 'mixolydian', seventh: 'dominant7' },
+            // Borrowed chords from parallel major
+            'I': { degree: 0, type: 'major', mode: 'ionian', seventh: 'major7' },
+            'IV': { degree: 3, type: 'major', mode: 'lydian', seventh: 'major7' }
         }
     },
 
@@ -51,26 +60,27 @@ export const Progressions = {
         return chords;
     },
 
-    getProgressions() {
-        return [
-            { name: 'I - IV - V', value: 'I-IV-V', use7ths: false },
-            { name: 'I - V - vi - IV', value: 'I-V-vi-IV', use7ths: false },
-            { name: 'I - IV - vi - V', value: 'I-IV-vi-V', use7ths: false },
-            { name: 'I - vi - IV - V', value: 'I-vi-IV-V', use7ths: false },
-            { name: 'vi - IV - I - V', value: 'vi-IV-I-V', use7ths: false },
-            { name: 'I - iii - IV - V', value: 'I-iii-IV-V', use7ths: false },
-            { name: 'I - IV - I - V', value: 'I-IV-I-V', use7ths: false },
-            { name: 'I - V - IV - V', value: 'I-V-IV-V', use7ths: false },
-            { name: 'I - vi - ii - V', value: 'I-vi-ii-V', use7ths: true },
-            { name: 'ii - V - I', value: 'ii-V-I', use7ths: true },
-            { name: 'iii - vi - ii - V', value: 'iii-vi-ii-V', use7ths: true },
-            { name: 'I - III - IV - iv', value: 'I-III-IV-iv', use7ths: false },
-            { name: 'i - VI - III - VII', value: 'i-VI-III-VII', use7ths: false },
-            { name: 'i - iv - v', value: 'i-iv-v', use7ths: false },
-            { name: 'i - VII - VI - VII', value: 'i-VII-VI-VII', use7ths: false },
-            { name: 'i - iv - VII - III', value: 'i-iv-VII-III', use7ths: false },
-            { name: 'i - VI - VII', value: 'i-VI-VII', use7ths: false },
-            { name: 'i - III - VII - iv', value: 'i-III-VII-iv', use7ths: false }
+    getProgressions(quality = null) {
+        const all = [
+            { name: 'I - IV - V', value: 'I-IV-V', use7ths: false, quality: 'major' },
+            { name: 'I - V - vi - IV', value: 'I-V-vi-IV', use7ths: false, quality: 'major' },
+            { name: 'I - IV - vi - V', value: 'I-IV-vi-V', use7ths: false, quality: 'major' },
+            { name: 'I - vi - IV - V', value: 'I-vi-IV-V', use7ths: false, quality: 'major' },
+            { name: 'vi - IV - I - V', value: 'vi-IV-I-V', use7ths: false, quality: 'major' },
+            { name: 'I - iii - IV - V', value: 'I-iii-IV-V', use7ths: false, quality: 'major' },
+            { name: 'I - IV - I - V', value: 'I-IV-I-V', use7ths: false, quality: 'major' },
+            { name: 'I - V - IV - V', value: 'I-V-IV-V', use7ths: false, quality: 'major' },
+            { name: 'I - vi - ii - V', value: 'I-vi-ii-V', use7ths: true, quality: 'major' },
+            { name: 'ii - V - I', value: 'ii-V-I', use7ths: true, quality: 'major' },
+            { name: 'iii - vi - ii - V', value: 'iii-vi-ii-V', use7ths: true, quality: 'major' },
+            { name: 'I - III - IV - iv', value: 'I-III-IV-iv', use7ths: false, quality: 'major' },
+            { name: 'i - VI - III - VII', value: 'i-VI-III-VII', use7ths: false, quality: 'minor' },
+            { name: 'i - iv - v', value: 'i-iv-v', use7ths: false, quality: 'minor' },
+            { name: 'i - VII - VI - VII', value: 'i-VII-VI-VII', use7ths: false, quality: 'minor' },
+            { name: 'i - iv - VII - III', value: 'i-iv-VII-III', use7ths: false, quality: 'minor' },
+            { name: 'i - VI - VII', value: 'i-VI-VII', use7ths: false, quality: 'minor' },
+            { name: 'i - III - VII - iv', value: 'i-III-VII-iv', use7ths: false, quality: 'minor' }
         ];
+        return quality ? all.filter(p => p.quality === quality) : all;
     }
 };

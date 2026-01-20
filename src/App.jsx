@@ -792,7 +792,7 @@ function App() {
                                         <option key={k} value={k}>{k}</option>
                                     ))}
                                 </select>
-                                <select value={progQuality} onChange={(e) => setProgQuality(e.target.value)}>
+                                <select value={progQuality} onChange={(e) => { setProgQuality(e.target.value); setSelectedProgression(''); }}>
                                     <option value="major">Major</option>
                                     <option value="minor">Minor</option>
                                 </select>
@@ -802,7 +802,7 @@ function App() {
                                     onChange={(e) => loadProgression(e.target.value)}
                                 >
                                     <option value="">Select Progression...</option>
-                                    {Progressions.getProgressions().map(p => (
+                                    {Progressions.getProgressions(progQuality).map(p => (
                                         <option key={p.value} value={p.value}>{p.name}</option>
                                     ))}
                                 </select>
