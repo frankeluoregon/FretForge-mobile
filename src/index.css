@@ -1076,7 +1076,7 @@ body:has(.top-bar.mobile-static) .page-content {
 .controls-bar {
     width: 100%;
     padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--bg-element);
     border-top: 1px solid var(--border-dim);
     display: flex;
     align-items: center;
@@ -1104,7 +1104,7 @@ body:has(.top-bar.mobile-static) .page-content {
 .progression-select-row {
     width: 100%;
     padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--bg-element);
     border-top: 1px solid var(--border-dim);
     justify-content: center;
     display: flex;
@@ -1445,7 +1445,7 @@ input[type="checkbox"] {
 }
 
 .utility-btn:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-input);
     border-color: var(--border-dim);
 }
 
@@ -3133,7 +3133,7 @@ input[type="checkbox"] {
         flex-wrap: wrap;
         gap: 8px;
         padding: 8px 10px;
-        background: rgba(0, 0, 0, 0.15);
+        background: var(--bg-element);
         border-top: 1px solid var(--border-dim);
         align-items: center;
         justify-content: center;
