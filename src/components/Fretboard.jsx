@@ -63,11 +63,12 @@ const Fretboard = ({
                                     onClick={() => onNoteClick && onNoteClick(stringIndex, fret)}
                                 >
                                     {shouldRenderMarker && (
-                                        <div className={`fret-marker 
-                                            ${isRoot ? 'root' : ''} 
-                                            ${isChordTone ? 'chord-tone' : ''} 
-                                            ${isScaleNote && !isChordTone ? 'scale-note' : ''} 
-                                            ${isLeadingNote ? 'leading-note' : ''}
+                                        <div className={`fret-marker
+                                            ${isRoot ? 'root' : ''}
+                                            ${isChordTone ? 'chord-tone' : ''}
+                                            ${isScaleNote && !isChordTone ? 'scale-note' : ''}
+                                            ${isLeadingNote && !isChordTone ? 'leading-note' : ''}
+                                            ${isLeadingNote && isChordTone && !isRoot ? 'chord-tone-leading' : ''}
                                             ${isFilterMode && !isSelected ? 'dimmed' : ''}
                                             ${isFilterMode && isSelected ? 'selected' : ''}
                                             ${onNoteClick ? 'interactive' : ''}
@@ -78,17 +79,18 @@ const Fretboard = ({
                                                     <span className="interval">R</span>
                                                 </>
                                             )}
-                                            {!isRoot && isLeadingNote && (
-                                                // Leading note arrow handled by CSS ::before
-                                                <span />
-                                            )}
-                                            {!isRoot && !isLeadingNote && isChordTone && (
+                                            {!isRoot && isChordTone && (
                                                 <>
                                                     <span className="note-name" dangerouslySetInnerHTML={{__html: note.replace('#', '<sup>♯</sup>')}} />
                                                     <span className="interval">{MusicTheory.getChordIntervalLabel(root, note, chordType)}</span>
+                                                    {isLeadingNote && <span className="leading-arrow">➜</span>}
                                                 </>
                                             )}
-                                            {!isRoot && !isLeadingNote && !isChordTone && isScaleNote && (
+                                            {!isRoot && !isChordTone && isLeadingNote && (
+                                                // Leading note arrow handled by CSS ::before
+                                                <span />
+                                            )}
+                                            {!isRoot && !isChordTone && !isLeadingNote && isScaleNote && (
                                                 <>
                                                     <span className="note-name" dangerouslySetInnerHTML={{__html: note.replace('#', '<sup>♯</sup>')}} />
                                                     <span className="interval">{MusicTheory.getScaleDegreeLabel(root, note, mode)}</span>
