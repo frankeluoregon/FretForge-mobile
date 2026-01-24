@@ -305,15 +305,22 @@ function App() {
         setChords(newChords);
     };
 
-    const loadProgression = (value) => {
+    const loadProgression = (value, key = progKey, quality = progQuality) => {
         if (!value) return;
         const option = Progressions.getProgressions().find(p => p.value === value);
         if (option) {
-            const newChords = Progressions.parseProgression(value, progKey, progQuality, option.use7ths);
+            const newChords = Progressions.parseProgression(value, key, quality, option.use7ths);
             setChords(newChords.map(c => ({ ...c, visiblePositions: null, isFiltering: false })));
             setSelectedProgression(value);
         }
     };
+
+    // Recalculate progression when key or quality changes
+    useEffect(() => {
+        if (mode === 'progression' && selectedProgression) {
+            loadProgression(selectedProgression, progKey, progQuality);
+        }
+    }, [progKey, progQuality]);
 
     const playChord = (chord, mode) => {
         if (mode === 'harmony') MIDIPlayer.playChordHarmony(chord, instrument, currentTuning);
@@ -649,6 +656,16 @@ function App() {
                             </button>
                         )}
 
+                        {/* Key/Legend */}
+                        <button
+                            className={`utility-btn ${activeUtilityPanel === 'key' ? 'active' : ''}`}
+                            onClick={() => setActiveUtilityPanel(activeUtilityPanel === 'key' ? null : 'key')}
+                            title="Note type legend"
+                        >
+                            <span className="icon-mask icon-key"></span>
+                            <span className="utility-label">Key</span>
+                        </button>
+
                         {/* Reset */}
                         <button
                             className="utility-btn"
@@ -657,6 +674,16 @@ function App() {
                         >
                             <span className="icon-mask icon-reset"></span>
                             <span className="utility-label">Reset</span>
+                        </button>
+
+                        {/* Help */}
+                        <button
+                            className="utility-btn"
+                            onClick={() => window.open('https://canvasback.us/fretforge/howto', '_blank')}
+                            title="How to use FretForge"
+                        >
+                            <span className="icon-mask icon-help"></span>
+                            <span className="utility-label">Help</span>
                         </button>
                     </div>
 
@@ -777,6 +804,30 @@ function App() {
                                             <span className="icon-mask icon-download"></span>
                                             Export PDF
                                         </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Key/Legend Panel */}
+                            {activeUtilityPanel === 'key' && (
+                                <div className="utility-panel-content key-panel">
+                                    <div className="key-legend">
+                                        <div className="key-item">
+                                            <span className="key-indicator root">A</span>
+                                            <span className="key-label">Root Note</span>
+                                        </div>
+                                        <div className="key-item">
+                                            <span className="key-indicator chord-tone">C♯</span>
+                                            <span className="key-label">Chord Tone</span>
+                                        </div>
+                                        <div className="key-item">
+                                            <span className="key-indicator scale-note">B♭</span>
+                                            <span className="key-label">Scale Note</span>
+                                        </div>
+                                        <div className="key-item">
+                                            <span className="key-indicator leading-note">➜</span>
+                                            <span className="key-label">Leading Note</span>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -947,7 +998,7 @@ function App() {
                 </div>
             </div>
             <footer className="app-footer">
-                &copy; 2026 Rik Frankel
+                &copy; 2026 <a href="https://canvasback.us" target="_blank" rel="noopener noreferrer">Canvasback Solutions</a>
             </footer>
         </div>
     );

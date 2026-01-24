@@ -75,7 +75,7 @@ export const Progressions = {
             { name: 'iii - vi - ii - V', value: 'iii-vi-ii-V', use7ths: true, quality: 'major' },
             { name: 'I - III - IV - iv', value: 'I-III-IV-iv', use7ths: false, quality: 'major' },
             { name: 'i - VI - III - VII', value: 'i-VI-III-VII', use7ths: false, quality: 'minor' },
-            { name: 'i - iv - v', value: 'i-iv-v', use7ths: false, quality: 'minor' },
+            { name: 'i - iv - V', value: 'i-iv-V', use7ths: false, quality: 'minor' },
             { name: 'i - VII - VI - VII', value: 'i-VII-VI-VII', use7ths: false, quality: 'minor' },
             { name: 'i - iv - VII - III', value: 'i-iv-VII-III', use7ths: false, quality: 'minor' },
             { name: 'i - VI - VII', value: 'i-VI-VII', use7ths: false, quality: 'minor' },

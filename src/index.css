@@ -1533,6 +1533,75 @@ input[type="checkbox"] {
     justify-content: center;
 }
 
+/* Key Legend Panel */
+.key-panel {
+    min-width: 200px;
+}
+
+.key-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.key-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.key-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.key-indicator.root {
+    width: 32px;
+    height: 32px;
+    background: var(--root-bg);
+    color: var(--root-text);
+    border: 3px solid var(--root-border);
+    border-radius: 50%;
+    font-weight: 900;
+}
+
+.key-indicator.chord-tone {
+    width: 32px;
+    height: 32px;
+    background: var(--tone-bg);
+    color: var(--tone-text);
+    border: 3px solid var(--tone-border);
+    border-radius: 4px;
+}
+
+.key-indicator.scale-note {
+    width: 32px;
+    height: 32px;
+    background: var(--scale-bg);
+    color: var(--scale-text);
+    border: 2px solid var(--scale-border);
+    border-radius: 50%;
+}
+
+.key-indicator.leading-note {
+    width: 48px;
+    height: 30px;
+    background: var(--border-bright);
+    color: var(--btn-hover);
+    border: 2px solid var(--leading-border);
+    border-radius: 20px;
+    font-size: 16px;
+}
+
+.key-label {
+    color: var(--text-main);
+    font-size: 0.9em;
+}
+
 /* Theme Grid - grid layout for theme selection */
 .theme-grid {
     display: grid;
@@ -1778,6 +1847,16 @@ input[type="checkbox"] {
 .icon-close {
     -webkit-mask-image: url('/close.svg');
     mask-image: url('/close.svg');
+}
+
+.icon-key {
+    -webkit-mask-image: url('/key.svg');
+    mask-image: url('/key.svg');
+}
+
+.icon-help {
+    -webkit-mask-image: url('/help.svg');
+    mask-image: url('/help.svg');
 }
 
 /* Tray Icon Wrappers - position relative for flyout popups */
@@ -3489,4 +3568,13 @@ input[type="checkbox"] {
     color: var(--text-main);
     font-size: 0.85em;
     opacity: 0.8;
+}
+
+.app-footer a {
+    color: var(--text-highlight);
+    text-decoration: none;
+}
+
+.app-footer a:hover {
+    text-decoration: underline;
 }

@@ -8,11 +8,11 @@ android {
         applicationId "app.fretforge.android"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.0.1"
+        versionCode 4
+        versionName "1.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        // Vector drawable support for older devices
+        // Vector drawablse support for older devices
         vectorDrawables.useSupportLibrary = true
 
         aaptOptions {
