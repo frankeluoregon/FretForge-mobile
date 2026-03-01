@@ -126,12 +126,16 @@ function App() {
     // Mobile Optimization Effect
     useEffect(() => {
         const handleResize = () => {
-            // Only apply on mobile devices
             if (window.innerWidth <= 768) {
-                // Update fret count based on orientation
-                // Portrait: 5 frets, Landscape: 12 frets
+                // Mobile: fret count based on orientation
                 const isLandscape = window.innerWidth > window.innerHeight;
                 setNumFrets(isLandscape ? 12 : 5);
+            } else {
+                // Desktop: compute frets to fill the available width
+                // page-content is 96% of viewport; fretboard-container has 40px padding; 60px label column
+                const availableWidth = window.innerWidth * 0.96 - 40 - 60;
+                const computed = Math.min(24, Math.max(12, Math.floor(availableWidth / 80)));
+                setNumFrets(computed);
             }
         };
 
@@ -330,7 +334,12 @@ function App() {
 
     const resetFretboardSettings = () => {
         if (window.confirm('Reset fretboard view settings to default?')) {
-            setNumFrets(window.innerWidth > window.innerHeight ? 12 : 5);
+            if (window.innerWidth <= 768) {
+                setNumFrets(window.innerWidth > window.innerHeight ? 12 : 5);
+            } else {
+                const availableWidth = window.innerWidth * 0.96 - 40 - 60;
+                setNumFrets(Math.min(24, Math.max(12, Math.floor(availableWidth / 80))));
+            }
             setZoom(100);
             setChords(mode === 'progression' ? (savedSettings.progressionChords || DEFAULT_CHORDS) : DEFAULT_CHORDS);
         }
