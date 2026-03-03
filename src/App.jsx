@@ -65,7 +65,7 @@ function App() {
         return savedSettings.numFrets || 12;
     });
     const [showScaleNotes, setShowScaleNotes] = useState(savedSettings.showScaleNotes ?? true);
-    const [showLeadingNotes, setShowLeadingNotes] = useState(savedSettings.showLeadingNotes ?? true);
+    const [showPassingNotes, setShowPassingNotes] = useState(savedSettings.showPassingNotes ?? true);
     const [theme, setTheme] = useState(savedSettings.theme || 'default');
     const [zoom, setZoom] = useState(savedSettings.zoom || 100);
     const [playbackMode, setPlaybackMode] = useState(savedSettings.playbackMode || 'strum');
@@ -89,7 +89,7 @@ function App() {
     // Persistence Effect
     useEffect(() => {
         const settings = {
-            mode, instrument, guitarTuning, numFrets, showScaleNotes, showLeadingNotes,
+            mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes,
             theme, zoom, playbackMode, progKey, progQuality, selectedProgression,
             // Save current chords to the appropriate bucket, preserve the other from existing storage
             fretboardChords: mode === 'fretboard' ? chords : (savedSettings.fretboardChords || DEFAULT_CHORDS),
@@ -109,7 +109,7 @@ function App() {
         }
 
         localStorage.setItem('fretforge_settings', JSON.stringify(settings, replacer));
-    }, [mode, instrument, guitarTuning, numFrets, showScaleNotes, showLeadingNotes, theme, zoom, playbackMode, progKey, progQuality, selectedProgression, chords]);
+    }, [mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode, progKey, progQuality, selectedProgression, chords]);
 
     // Derived State
     const currentTuning = useMemo(() => {
@@ -453,11 +453,11 @@ function App() {
                 const isChordTone = chordNotes.some(n => MusicTheory.areNotesEqual(note, n));
                 const isScaleNote = scaleNotes.some(n => MusicTheory.areNotesEqual(note, n));
                 const isRoot = MusicTheory.areNotesEqual(note, chord.root);
-                const leadingNote = nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
-                const isLeadingNote = leadingNote && MusicTheory.areNotesEqual(note, leadingNote);
+                const passingNote = nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
+                const isPassingNote = passingNote && MusicTheory.areNotesEqual(note, passingNote);
 
                 // Only draw if it's a valid note type and visibility settings allow it
-                if (isChordTone || (showScaleNotes && isScaleNote) || isLeadingNote) {
+                if (isChordTone || (showScaleNotes && isScaleNote) || isPassingNote) {
                     const x = 50 + (fret === 0 ? 0 : fret * fretSpacing - fretSpacing / 2);
                     const y = fretboardTop + stringIndex * stringSpacing;
                     const size = 14;
@@ -466,7 +466,7 @@ function App() {
 
                     if (isRoot) {
                         fillColor = '#000000'; strokeColor = '#FFFFFF'; textColor = '#FFFFFF'; lineWidth = 3; shape = 'square';
-                    } else if (isLeadingNote) {
+                    } else if (isPassingNote) {
                         fillColor = '#999999'; strokeColor = '#999999'; textColor = '#000000'; lineWidth = 0; shape = 'triangle';
                     } else if (isChordTone) {
                         fillColor = '#CCCCCC'; strokeColor = '#CCCCCC'; textColor = '#000000'; lineWidth = 2; shape = 'square';
@@ -589,7 +589,7 @@ function App() {
                 pdf.addPage();
             }
             
-            const nextRoot = (mode === 'progression' && showLeadingNotes && i < chords.length - 1) ? chords[i+1].root : (mode === 'progression' && showLeadingNotes ? chords[0].root : null);
+            const nextRoot = (mode === 'progression' && showPassingNotes && i < chords.length - 1) ? chords[i+1].root : (mode === 'progression' && showPassingNotes ? chords[0].root : null);
             const label = `${chord.root} ${chord.type} (${chord.mode})`;
             
             drawFretboardOnCanvas(canvas, chord, label, nextRoot, printFrets, currentTuning);
@@ -687,15 +687,15 @@ function App() {
                             <span className="utility-label">Scale</span>
                         </button>
 
-                        {/* Leading Notes Toggle - Progression mode only */}
+                        {/* Passing Notes Toggle - Progression mode only */}
                         {mode === 'progression' && (
                             <button
-                                className={`utility-btn utility-toggle ${!showLeadingNotes ? 'off' : ''}`}
-                                onClick={() => setShowLeadingNotes(s => !s)}
-                                title={showLeadingNotes ? "Leading notes visible" : "Leading notes hidden"}
+                                className={`utility-btn utility-toggle ${!showPassingNotes ? 'off' : ''}`}
+                                onClick={() => setShowPassingNotes(s => !s)}
+                                title={showPassingNotes ? "Passing notes visible" : "Passing notes hidden"}
                             >
-                                <span className="icon-mask icon-leading"></span>
-                                <span className="utility-label">Leading</span>
+                                <span className="icon-mask icon-passing"></span>
+                                <span className="utility-label">Passing</span>
                             </button>
                         )}
 
@@ -868,8 +868,8 @@ function App() {
                                             <span className="key-label">Scale Note</span>
                                         </div>
                                         <div className="key-item">
-                                            <span className="key-indicator leading-note">➜</span>
-                                            <span className="key-label">Leading Note</span>
+                                            <span className="key-indicator passing-note">➜</span>
+                                            <span className="key-label">Passing Note</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1045,7 +1045,7 @@ function App() {
                                 mode={chord.mode}
                                 nextChordRoot={mode === 'progression' ? (index < chords.length - 1 ? chords[index+1].root : chords[0].root) : null}
                                 showScaleNotes={showScaleNotes}
-                                showLeadingNotes={showLeadingNotes}
+                                showPassingNotes={showPassingNotes}
                                 visiblePositions={chord.visiblePositions}
                                 isFilterMode={chord.isFiltering}
                                 onNoteClick={(s, f) => handleNoteClick(index, s, f)}

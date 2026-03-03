@@ -11,7 +11,7 @@ const App = {
     // Progression mode settings
     progressionKey: 'C',
     progressionQuality: 'major',
-    showLeadingNotes: true,
+    showPassingNotes: true,
     showScaleNotes: true,
 
     /**
@@ -283,9 +283,9 @@ const App = {
             this.progressionQuality = e.target.value;
         });
 
-        // Progression toggle for leading notes
-        document.getElementById('show-leading-notes').addEventListener('change', (e) => {
-            this.showLeadingNotes = e.target.checked;
+        // Progression toggle for passing notes
+        document.getElementById('show-passing-notes').addEventListener('change', (e) => {
+            this.showPassingNotes = e.target.checked;
             if (this.currentMode === 'progression') {
                 this.renderProgressionDisplay();
             }
@@ -399,7 +399,7 @@ const App = {
         document.getElementById('num-chords-group').style.display = mode === 'fretboard' ? 'flex' : 'none';
         document.getElementById('progression-key-group').style.display = isProgressionMode ? 'flex' : 'none';
         document.getElementById('progression-quality-group').style.display = isProgressionMode ? 'flex' : 'none';
-        document.getElementById('show-leading-notes-group').style.display = isProgressionMode ? 'flex' : 'none';
+        document.getElementById('show-passing-notes-group').style.display = isProgressionMode ? 'flex' : 'none';
         document.getElementById('progression-select-group').style.display = isProgressionMode ? 'flex' : 'none';
 
         // Load first progression when entering progression mode
@@ -506,7 +506,7 @@ const App = {
                     chord.type,
                     chord.mode,
                     nextChordRoot,
-                    this.showLeadingNotes,  // Use toggle value
+                    this.showPassingNotes,  // Use toggle value
                     this.showScaleNotes,    // Use toggle value
                     chord.visiblePositions, // Filter set
                     chord.isFiltering,      // Filter mode active?
@@ -838,12 +838,12 @@ const App = {
                 
                 const isChordTone = chordNotes.some(n => MusicTheory.areNotesEqual(note, n));
                 const isScaleNote = scaleNotes.some(n => MusicTheory.areNotesEqual(note, n));
-                const leadingNote = this.showLeadingNotes && nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
-                const isLeadingNote = leadingNote && MusicTheory.areNotesEqual(note, leadingNote);
+                const passingNote = this.showPassingNotes && nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
+                const isPassingNote = passingNote && MusicTheory.areNotesEqual(note, passingNote);
                 
                 const shouldShowScaleNote = this.showScaleNotes && isScaleNote && !isChordTone;
 
-                if (isChordTone || shouldShowScaleNote || isLeadingNote) {
+                if (isChordTone || shouldShowScaleNote || isPassingNote) {
                     visibleSet.add(`${s}-${f}`);
                 }
             }
@@ -1062,7 +1062,7 @@ const App = {
             chord.type,
             chord.mode,
             null,  // nextChordRoot (not used in chord select)
-            false, // showLeadingNotes (not used in chord select)
+            false, // showPassingNotes (not used in chord select)
             this.showScaleNotes,  // Use toggle value
             chord.visiblePositions,
             chord.isFiltering,
@@ -1206,10 +1206,10 @@ const App = {
                 const isScaleNote = scaleNotes.some(n => MusicTheory.areNotesEqual(note, n));
                 const isRoot = MusicTheory.areNotesEqual(note, chord.root);
                 // Leading note is a half step below the next chord's root
-                const leadingNote = nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
-                const isLeadingNote = leadingNote && MusicTheory.areNotesEqual(note, leadingNote);
+                const passingNote = nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
+                const isPassingNote = passingNote && MusicTheory.areNotesEqual(note, passingNote);
 
-                if (isChordTone || isScaleNote || isLeadingNote) {
+                if (isChordTone || isScaleNote || isPassingNote) {
                     const x = 50 + (fret === 0 ? 0 : fret * fretSpacing - fretSpacing / 2);
                     const y = fretboardTop + stringIndex * stringSpacing;
                     const size = 14;
@@ -1223,8 +1223,8 @@ const App = {
                         textColor = '#FFFFFF';  // White text
                         lineWidth = 3;
                         shape = 'square';
-                    } else if (isLeadingNote) {
-                        // All leading notes use triangle
+                    } else if (isPassingNote) {
+                        // All passing notes use triangle
                         fillColor = '#999999';  // Medium gray
                         strokeColor = '#999999';
                         textColor = '#000000';  // Black text
@@ -1275,7 +1275,7 @@ const App = {
                     let label;
                     if (isRoot) {
                         label = 'R';
-                    } else if (isLeadingNote) {
+                    } else if (isPassingNote) {
                         label = 'L';
                     } else if (isChordTone) {
                         label = MusicTheory.getChordIntervalLabel(chord.root, note, chord.type);
@@ -1317,7 +1317,7 @@ const App = {
 
         for (let i = 0; i < this.chords.length; i++) {
             const chord = this.chords[i];
-            // Only pass nextChordRoot in progression mode (to show leading notes)
+            // Only pass nextChordRoot in progression mode (to show passing notes)
             const nextChordRoot = this.currentMode === 'progression'
                 ? (i < this.chords.length - 1 ? this.chords[i + 1].root : this.chords[0].root)
                 : null;

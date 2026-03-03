@@ -142,7 +142,7 @@ const Fretboard = {
     /**
      * Update the fretboard with note markers
      */
-    updateFretboard(containerId, rootNote, chordType, scaleType, nextChordRoot = null, showLeadingNotes = false, showScaleNotes = true, visiblePositions = null, isFilterMode = false, onNoteClick = null) {
+    updateFretboard(containerId, rootNote, chordType, scaleType, nextChordRoot = null, showPassingNotes = false, showScaleNotes = true, visiblePositions = null, isFilterMode = false, onNoteClick = null) {
         const container = document.getElementById(containerId);
         const chordNotes = MusicTheory.getChordNotes(rootNote, chordType);
         const scaleNotes = MusicTheory.getScaleNotes(rootNote, scaleType);
@@ -172,13 +172,13 @@ const Fretboard = {
                     MusicTheory.areNotesEqual(note, scaleNote)
                 );
                 const isRoot = MusicTheory.areNotesEqual(note, rootNote);
-                // Leading note is a half step below the next chord's root (only in progression mode)
-                const leadingNote = showLeadingNotes && nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
-                const isLeadingNote = leadingNote && MusicTheory.areNotesEqual(note, leadingNote);
+                // Passing note is a half step below the next chord's root (only in progression mode)
+                const passingNote = showPassingNotes && nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
+                const isPassingNote = passingNote && MusicTheory.areNotesEqual(note, passingNote);
 
                 // Determine if this note is theoretically valid for the current settings
                 const shouldShowScaleNote = showScaleNotes && isScaleNote && !isChordTone;
-                const isValidNote = isChordTone || shouldShowScaleNote || isLeadingNote;
+                const isValidNote = isChordTone || shouldShowScaleNote || isPassingNote;
 
                 if (!isValidNote) continue;
 
@@ -197,7 +197,7 @@ const Fretboard = {
                     if (isRoot) {
                         const noteName = note.replace('#', '<sup>♯</sup>');
                         marker.innerHTML = `<span class="note-name">${noteName}</span><span class="interval">R</span>`;
-                    } else if (isLeadingNote) {
+                    } else if (isPassingNote) {
                         // Leading note displays arrow via CSS ::before
                         marker.innerHTML = '';
                     } else if (isChordTone) {
@@ -216,9 +216,9 @@ const Fretboard = {
                         if (isChordTone) {
                             marker.classList.add('chord-tone');
                         }
-                    } else if (isLeadingNote) {
-                        // All leading notes use triangle, regardless of whether they're chord tones
-                        marker.classList.add('leading-note');
+                    } else if (isPassingNote) {
+                        // All passing notes use triangle, regardless of whether they're chord tones
+                        marker.classList.add('passing-note');
                     } else if (isChordTone) {
                         marker.classList.add('chord-tone');
                     } else if (isScaleNote) {
@@ -252,8 +252,8 @@ const Fretboard = {
     /**
      * Render a complete fretboard (create + update)
      */
-    renderFretboard(containerId, rootNote, chordType, scaleType, nextChordRoot = null, showLeadingNotes = false, showScaleNotes = true, visiblePositions = null, isFilterMode = false, onNoteClick = null) {
+    renderFretboard(containerId, rootNote, chordType, scaleType, nextChordRoot = null, showPassingNotes = false, showScaleNotes = true, visiblePositions = null, isFilterMode = false, onNoteClick = null) {
         this.createFretboard(containerId);
-        this.updateFretboard(containerId, rootNote, chordType, scaleType, nextChordRoot, showLeadingNotes, showScaleNotes, visiblePositions, isFilterMode, onNoteClick);
+        this.updateFretboard(containerId, rootNote, chordType, scaleType, nextChordRoot, showPassingNotes, showScaleNotes, visiblePositions, isFilterMode, onNoteClick);
     }
 };

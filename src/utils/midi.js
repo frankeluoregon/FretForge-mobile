@@ -210,7 +210,7 @@ export const MIDIPlayer = {
             bass4: [2, 2, 1, 1],
             bass5: [2, 2, 1, 1, 0],
             bass6: [3, 2, 2, 1, 1, 0],
-            ukulele: [4, 4, 4, 4],
+            ukulele: [4, 4, 4, 5],
             mandolin: [5, 5, 4, 4, 4, 4, 3, 3],
             banjo: [4, 3, 3, 3, 4]
         };

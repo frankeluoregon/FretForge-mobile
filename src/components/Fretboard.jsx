@@ -9,7 +9,7 @@ const Fretboard = ({
     mode,
     nextChordRoot,
     showScaleNotes,
-    showLeadingNotes,
+    showPassingNotes,
     visiblePositions,
     isFilterMode,
     onNoteClick,
@@ -45,11 +45,11 @@ const Fretboard = ({
                             const isScaleNote = scaleNotes.some(n => MusicTheory.areNotesEqual(note, n));
                             const isRoot = MusicTheory.areNotesEqual(note, root);
                             
-                            const leadingNote = showLeadingNotes && nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
-                            const isLeadingNote = leadingNote && MusicTheory.areNotesEqual(note, leadingNote);
+                            const passingNote = showPassingNotes && nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
+                            const isPassingNote = passingNote && MusicTheory.areNotesEqual(note, passingNote);
 
                             const shouldShowScaleNote = showScaleNotes && isScaleNote && !isChordTone;
-                            const isValidNote = isChordTone || shouldShowScaleNote || isLeadingNote;
+                            const isValidNote = isChordTone || shouldShowScaleNote || isPassingNote;
 
                             // Filter logic
                             const posKey = `${stringIndex}-${fret}`;
@@ -67,8 +67,8 @@ const Fretboard = ({
                                             ${isRoot ? 'root' : ''}
                                             ${isChordTone ? 'chord-tone' : ''}
                                             ${isScaleNote && !isChordTone ? 'scale-note' : ''}
-                                            ${isLeadingNote && !isChordTone ? 'leading-note' : ''}
-                                            ${isLeadingNote && isChordTone && !isRoot ? 'chord-tone-leading' : ''}
+                                            ${isPassingNote && !isChordTone ? 'passing-note' : ''}
+                                            ${isPassingNote && isChordTone && !isRoot ? 'chord-tone-passing' : ''}
                                             ${isFilterMode && !isSelected ? 'dimmed' : ''}
                                             ${isFilterMode && isSelected ? 'selected' : ''}
                                             ${onNoteClick ? 'interactive' : ''}
@@ -83,14 +83,14 @@ const Fretboard = ({
                                                 <>
                                                     <span className="note-name" dangerouslySetInnerHTML={{__html: note.replace('#', '<sup>♯</sup>')}} />
                                                     <span className="interval">{MusicTheory.getChordIntervalLabel(root, note, chordType)}</span>
-                                                    {isLeadingNote && <span className="leading-arrow">➜</span>}
+                                                    {isPassingNote && <span className="passing-arrow">➜</span>}
                                                 </>
                                             )}
-                                            {!isRoot && !isChordTone && isLeadingNote && (
-                                                // Leading note arrow handled by CSS ::before
+                                            {!isRoot && !isChordTone && isPassingNote && (
+                                                // Passing note arrow handled by CSS ::before
                                                 <span />
                                             )}
-                                            {!isRoot && !isChordTone && !isLeadingNote && isScaleNote && (
+                                            {!isRoot && !isChordTone && !isPassingNote && isScaleNote && (
                                                 <>
                                                     <span className="note-name" dangerouslySetInnerHTML={{__html: note.replace('#', '<sup>♯</sup>')}} />
                                                     <span className="interval">{MusicTheory.getScaleDegreeLabel(root, note, mode)}</span>
