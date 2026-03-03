@@ -5,6 +5,7 @@ import { MusicTheory } from './utils/musicTheory';
 import { MIDIPlayer } from './utils/midi';
 import { Progressions } from './utils/progressions';
 import Logo from './components/Logo';
+import { getVoicingsForChord } from './utils/voicings.js';
 
 const TUNINGS = {
     guitar: {
@@ -117,6 +118,11 @@ function App() {
         }
         return TUNINGS[instrument] || TUNINGS.guitar.standard;
     }, [instrument, guitarTuning]);
+
+    // Clear voicing selections when instrument changes
+    useEffect(() => {
+        setChords(prev => prev.map(c => ({ ...c, selectedVoicing: null, visiblePositions: null })));
+    }, [instrument]);
 
     // Effects
     useEffect(() => {
@@ -256,15 +262,43 @@ function App() {
         
         // Reset filter if parameters change
         if (field === 'root' || field === 'type' || field === 'mode') {
-            newChords[index].visiblePositions = null;
             newChords[index].isFiltering = false;
-            
+
             // Auto-select default mode for type
             if (field === 'type') {
                 const options = MusicTheory.modeOptions[value];
                 if (options && options.length > 0) {
                     newChords[index].mode = options[0].value;
                 }
+            }
+
+            // Recompute voicing if one is selected, otherwise clear
+            const chord = newChords[index];
+            if (chord.selectedVoicing) {
+                const voicings = getVoicingsForChord(chord.root, chord.type, instrument, currentTuning);
+                const match = voicings.find(v => v.name === chord.selectedVoicing);
+                chord.visiblePositions = match ? match.positions : null;
+                if (!match) chord.selectedVoicing = null;
+            } else {
+                chord.visiblePositions = null;
+            }
+        }
+        setChords(newChords);
+    };
+
+    const handleVoicingChange = (index, voicingName) => {
+        const newChords = [...chords];
+        const chord = newChords[index];
+        if (!voicingName) {
+            chord.selectedVoicing = null;
+            chord.visiblePositions = null;
+        } else {
+            const voicings = getVoicingsForChord(chord.root, chord.type, instrument, currentTuning);
+            const match = voicings.find(v => v.name === voicingName);
+            if (match) {
+                chord.selectedVoicing = voicingName;
+                chord.visiblePositions = match.positions;
+                chord.isFiltering = false;
             }
         }
         setChords(newChords);
@@ -945,6 +979,21 @@ function App() {
                                             </select>
                                         </div>
                                     </>
+                                )}
+
+                                {/* Voicing selector — guitar and ukulele only */}
+                                {getVoicingsForChord(chord.root, chord.type, instrument, currentTuning).length > 0 && (
+                                    <div className="input-group">
+                                        <select
+                                            value={chord.selectedVoicing || ''}
+                                            onChange={e => handleVoicingChange(index, e.target.value || null)}
+                                        >
+                                            <option value="">Full neck</option>
+                                            {getVoicingsForChord(chord.root, chord.type, instrument, currentTuning).map(v => (
+                                                <option key={v.name} value={v.name}>{v.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 )}
 
                                 <div className="chord-tools">
