@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { jsPDF } from "jspdf";
 import Fretboard from './components/Fretboard';
 import { MusicTheory } from './utils/musicTheory';
 import { MIDIPlayer } from './utils/midi';
 import { Progressions } from './utils/progressions';
 import Logo from './components/Logo';
-import { getVoicingsForChord } from './utils/voicings.js';
+import { getVoicingsForChord, INSTRUMENT_MAX_FRETS } from './utils/voicings.js';
 
 const TUNINGS = {
     guitar: {
@@ -86,6 +86,10 @@ function App() {
         return savedSettings.fretboardChords || DEFAULT_CHORDS;
     });
 
+    // Ref to instrument for use inside resize closure (avoids stale closure)
+    const instrumentRef = useRef(instrument);
+    useEffect(() => { instrumentRef.current = instrument; }, [instrument]);
+
     // Persistence Effect
     useEffect(() => {
         const settings = {
@@ -119,9 +123,10 @@ function App() {
         return TUNINGS[instrument] || TUNINGS.guitar.standard;
     }, [instrument, guitarTuning]);
 
-    // Clear voicing selections when instrument changes
+    // Clear voicing selections when instrument changes; clamp numFrets to new instrument max
     useEffect(() => {
         setChords(prev => prev.map(c => ({ ...c, selectedVoicing: null, visiblePositions: null })));
+        setNumFrets(prev => Math.min(prev, INSTRUMENT_MAX_FRETS[instrument] || 24));
     }, [instrument]);
 
     // Effects
@@ -140,7 +145,7 @@ function App() {
                 // Desktop: compute frets to fill the available width
                 // page-content is 96% of viewport; fretboard-container has 40px padding; 60px label column
                 const availableWidth = window.innerWidth * 0.96 - 40 - 60;
-                const computed = Math.min(24, Math.max(12, Math.floor(availableWidth / 80)));
+                const computed = Math.min(INSTRUMENT_MAX_FRETS[instrumentRef.current] || 24, Math.max(12, Math.floor(availableWidth / 80)));
                 setNumFrets(computed);
             }
         };
@@ -299,6 +304,13 @@ function App() {
                 chord.selectedVoicing = voicingName;
                 chord.visiblePositions = match.positions;
                 chord.isFiltering = false;
+                // Auto-expand fret view so the selected voicing is visible
+                const maxFret = Math.max(...Array.from(match.positions).map(p => parseInt(p.split('-')[1])));
+                setNumFrets(prev => {
+                    const needed = maxFret + 2;
+                    const cap = INSTRUMENT_MAX_FRETS[instrument] || 24;
+                    return needed > prev ? Math.min(needed, cap) : prev;
+                });
             }
         }
         setChords(newChords);
@@ -343,6 +355,22 @@ function App() {
         setChords(newChords);
     };
 
+    const adjustChordCount = (newCount) => {
+        setChords(prev => {
+            if (newCount > prev.length) {
+                const additions = Array.from({ length: newCount - prev.length }, () => ({
+                    root: 'C', type: 'major', mode: 'ionian', visiblePositions: null, isFiltering: false
+                }));
+                return [...prev, ...additions];
+            }
+            return prev.slice(0, newCount);
+        });
+    };
+
+    const removeChord = (index) => {
+        setChords(prev => prev.filter((_, i) => i !== index));
+    };
+
     const loadProgression = (value, key = progKey, quality = progQuality) => {
         if (!value) return;
         const option = Progressions.getProgressions().find(p => p.value === value);
@@ -372,7 +400,7 @@ function App() {
                 setNumFrets(window.innerWidth > window.innerHeight ? 12 : 5);
             } else {
                 const availableWidth = window.innerWidth * 0.96 - 40 - 60;
-                setNumFrets(Math.min(24, Math.max(12, Math.floor(availableWidth / 80))));
+                setNumFrets(Math.min(INSTRUMENT_MAX_FRETS[instrument] || 24, Math.max(12, Math.floor(availableWidth / 80))));
             }
             setZoom(100);
             setChords(mode === 'progression' ? (savedSettings.progressionChords || DEFAULT_CHORDS) : DEFAULT_CHORDS);
@@ -728,6 +756,38 @@ function App() {
                             <span className="icon-mask icon-help"></span>
                             <span className="utility-label">Help</span>
                         </button>
+
+                        {/* Chord Count — fretboard mode only */}
+                        {mode === 'fretboard' && (
+                            <div className="chord-count-ctrl" title="Number of chords (1–12)">
+                                <select
+                                    className="chord-count-select"
+                                    value={chords.length}
+                                    onChange={e => adjustChordCount(parseInt(e.target.value))}
+                                >
+                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
+                                        <option key={n} value={n}>{n} chord{n !== 1 ? 's' : ''}</option>
+                                    ))}
+                                </select>
+                                <span className="chord-count-label">Chords</span>
+                            </div>
+                        )}
+
+                        {/* Fret Count Stepper */}
+                        <div className="fret-stepper" title="Adjust visible fret range (5 – instrument max)">
+                            <div className="fret-stepper-row">
+                                <button
+                                    className="fret-stepper-btn"
+                                    onClick={() => setNumFrets(n => Math.max(5, n - 1))}
+                                >−</button>
+                                <span className="fret-stepper-value">{numFrets}</span>
+                                <button
+                                    className="fret-stepper-btn"
+                                    onClick={() => setNumFrets(n => Math.min(INSTRUMENT_MAX_FRETS[instrument] || 24, n + 1))}
+                                >+</button>
+                            </div>
+                            <span className="fret-stepper-label">Frets</span>
+                        </div>
                     </div>
 
                     {/* Expandable Utility Panels */}
@@ -994,6 +1054,15 @@ function App() {
                                             ))}
                                         </select>
                                     </div>
+                                )}
+
+                                {/* Remove chord button — fretboard mode, more than 1 chord */}
+                                {mode === 'fretboard' && chords.length > 1 && (
+                                    <button
+                                        className="chord-remove-btn"
+                                        onClick={() => removeChord(index)}
+                                        title="Remove this chord"
+                                    >×</button>
                                 )}
 
                                 <div className="chord-tools">

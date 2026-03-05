@@ -1,5 +1,14 @@
 import { MusicTheory } from './musicTheory.js';
 
+export const INSTRUMENT_MAX_FRETS = {
+    guitar: 24,
+    bass4: 24,
+    bass5: 24,
+    bass6: 24,
+    ukulele: 22,
+    mandolin: 18,
+};
+
 // Guitar barre chord templates
 // offsets indexed by stringIndex (0 = high E, 5 = low E); null = skip string
 // anchorString = string where root is placed
@@ -34,11 +43,7 @@ const GUITAR_TEMPLATES = {
     ],
 };
 
-function computeGuitarVoicing(template, root, tuning) {
-    const rootIdx = MusicTheory.getNoteIndex(root);
-    const anchorIdx = MusicTheory.getNoteIndex(tuning[template.anchorString]);
-    const anchorFret = ((rootIdx - anchorIdx) % 12 + 12) % 12;
-
+function computeGuitarVoicingAtFret(template, anchorFret) {
     const positions = new Set();
     template.offsets.forEach((offset, strIdx) => {
         if (offset !== null) positions.add(`${strIdx}-${anchorFret + offset}`);
@@ -46,15 +51,16 @@ function computeGuitarVoicing(template, root, tuning) {
     return positions;
 }
 
-// For each string find the lowest fret where any chord tone appears
-function computeUkuleleVoicing(root, chordType, tuning) {
+// For each string find the lowest chord tone at or above startFret
+function computeUkuleleVoicing(root, chordType, tuning, startFret = 0) {
     const chordNotes = MusicTheory.getChordNotes(root, chordType);
     const positions = new Set();
     tuning.forEach((openNote, strIdx) => {
         const openBase = MusicTheory.getNoteIndex(openNote);
         let bestFret = Infinity;
         for (const note of chordNotes) {
-            const fret = ((MusicTheory.getNoteIndex(note) - openBase) % 12 + 12) % 12;
+            let fret = ((MusicTheory.getNoteIndex(note) - openBase) % 12 + 12) % 12;
+            while (fret < startFret) fret += 12;
             if (fret < bestFret) bestFret = fret;
         }
         if (bestFret !== Infinity) positions.add(`${strIdx}-${bestFret}`);
@@ -62,15 +68,72 @@ function computeUkuleleVoicing(root, chordType, tuning) {
     return positions;
 }
 
+function getRootFret(positions, root, tuning) {
+    let rootFret = Infinity;
+    for (const pos of positions) {
+        const [strIdx, fret] = pos.split('-').map(Number);
+        if (MusicTheory.areNotesEqual(MusicTheory.transposeNote(tuning[strIdx], fret), root)) {
+            if (fret < rootFret) rootFret = fret;
+        }
+    }
+    return rootFret === Infinity ? null : rootFret;
+}
+
 export function getVoicingsForChord(root, chordType, instrument, tuning) {
+    const maxFrets = INSTRUMENT_MAX_FRETS[instrument] || 24;
+
     if (instrument === 'guitar') {
-        return (GUITAR_TEMPLATES[chordType] || []).map(tpl => ({
-            name: tpl.name,
-            positions: computeGuitarVoicing(tpl, root, tuning),
-        }));
+        const result = [];
+        for (const tpl of GUITAR_TEMPLATES[chordType] || []) {
+            const rootIdx = MusicTheory.getNoteIndex(root);
+            const anchorIdx = MusicTheory.getNoteIndex(tuning[tpl.anchorString]);
+            let anchorFret = ((rootIdx - anchorIdx) % 12 + 12) % 12;
+            const maxOffset = Math.max(...tpl.offsets.filter(o => o !== null));
+            while (anchorFret + maxOffset <= maxFrets) {
+                result.push({
+                    name: `${tpl.name} (${anchorFret})`,
+                    position: anchorFret,
+                    positions: computeGuitarVoicingAtFret(tpl, anchorFret),
+                });
+                anchorFret += 12;
+            }
+        }
+        return result;
     }
+
     if (instrument === 'ukulele') {
-        return [{ name: 'Open', positions: computeUkuleleVoicing(root, chordType, tuning) }];
+        const rootIdx = MusicTheory.getNoteIndex(root);
+        // Collect all frets (0–11) where root appears on any string
+        const baseStartFrets = new Set();
+        tuning.forEach((openNote) => {
+            const openBase = MusicTheory.getNoteIndex(openNote);
+            baseStartFrets.add(((rootIdx - openBase) % 12 + 12) % 12);
+        });
+
+        const result = [];
+        const seenPositions = new Set();
+        [...baseStartFrets].sort((a, b) => a - b).forEach(baseStartFret => {
+            let startFret = baseStartFret;
+            while (startFret <= maxFrets) {
+                if (!seenPositions.has(startFret)) {
+                    seenPositions.add(startFret);
+                    const pos = computeUkuleleVoicing(root, chordType, tuning, startFret);
+                    const maxFret = Math.max(...Array.from(pos).map(p => parseInt(p.split('-')[1])));
+                    if (maxFret <= maxFrets) {
+                        const rootFret = getRootFret(pos, root, tuning) ?? startFret;
+                        result.push({
+                            name: `Fret ${rootFret}`,
+                            position: rootFret,
+                            positions: pos,
+                        });
+                    }
+                }
+                startFret += 12;
+            }
+        });
+        result.sort((a, b) => a.position - b.position);
+        return result;
     }
+
     return [];
 }
