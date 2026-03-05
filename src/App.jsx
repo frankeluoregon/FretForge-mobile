@@ -355,16 +355,9 @@ function App() {
         setChords(newChords);
     };
 
-    const adjustChordCount = (newCount) => {
-        setChords(prev => {
-            if (newCount > prev.length) {
-                const additions = Array.from({ length: newCount - prev.length }, () => ({
-                    root: 'C', type: 'major', mode: 'ionian', visiblePositions: null, isFiltering: false
-                }));
-                return [...prev, ...additions];
-            }
-            return prev.slice(0, newCount);
-        });
+    const addChord = () => {
+        if (chords.length >= 12) return;
+        setChords(prev => [...prev, { root: 'C', type: 'major', mode: 'ionian', visiblePositions: null, isFiltering: false }]);
     };
 
     const removeChord = (index) => {
@@ -757,22 +750,6 @@ function App() {
                             <span className="utility-label">Help</span>
                         </button>
 
-                        {/* Chord Count — fretboard mode only */}
-                        {mode === 'fretboard' && (
-                            <div className="chord-count-ctrl" title="Number of chords (1–12)">
-                                <select
-                                    className="chord-count-select"
-                                    value={chords.length}
-                                    onChange={e => adjustChordCount(parseInt(e.target.value))}
-                                >
-                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(n => (
-                                        <option key={n} value={n}>{n} chord{n !== 1 ? 's' : ''}</option>
-                                    ))}
-                                </select>
-                                <span className="chord-count-label">Chords</span>
-                            </div>
-                        )}
-
                         {/* Fret Count Stepper */}
                         <div className="fret-stepper" title="Adjust visible fret range (5 – instrument max)">
                             <div className="fret-stepper-row">
@@ -1122,6 +1099,13 @@ function App() {
                             />
                         </div>
                     ))}
+
+                    {/* Add Chord button — fretboard mode only */}
+                    {mode === 'fretboard' && chords.length < 12 && (
+                        <button className="add-chord-btn" onClick={addChord}>
+                            + Add Chord
+                        </button>
+                    )}
                 </div>
             </div>
             <footer className="app-footer">
