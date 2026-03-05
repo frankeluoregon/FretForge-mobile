@@ -79,6 +79,41 @@ function getRootFret(positions, root, tuning) {
     return rootFret === Infinity ? null : rootFret;
 }
 
+// Returns the shape/family options for the global nav voicing selector
+export function getVoicingFamilies(instrument) {
+    if (instrument === 'guitar') {
+        return [
+            { value: 'E-family', label: 'E-family' },
+            { value: 'A-family', label: 'A-family' },
+        ];
+    }
+    if (instrument === 'ukulele') {
+        return [
+            { value: 'slot-0', label: 'Open' },
+            { value: 'slot-1', label: '2nd pos' },
+            { value: 'slot-2', label: '3rd pos' },
+            { value: 'slot-3', label: '4th pos' },
+        ];
+    }
+    return [];
+}
+
+// Returns the single best voicing for a chord given a global family/shape selection
+export function getVoicingForFamily(root, chordType, instrument, tuning, family) {
+    if (!family) return null;
+    const voicings = getVoicingsForChord(root, chordType, instrument, tuning);
+    if (!voicings.length) return null;
+    if (instrument === 'guitar') {
+        const prefix = family === 'E-family' ? 'E' : 'A';
+        return voicings.find(v => v.name.startsWith(prefix)) || null;
+    }
+    if (instrument === 'ukulele') {
+        const slot = parseInt(family.replace('slot-', ''));
+        return voicings[slot] || null;
+    }
+    return null;
+}
+
 export function getVoicingsForChord(root, chordType, instrument, tuning) {
     const maxFrets = INSTRUMENT_MAX_FRETS[instrument] || 24;
 

@@ -5,7 +5,7 @@ import { MusicTheory } from './utils/musicTheory';
 import { MIDIPlayer } from './utils/midi';
 import { Progressions } from './utils/progressions';
 import Logo from './components/Logo';
-import { getVoicingsForChord, INSTRUMENT_MAX_FRETS } from './utils/voicings.js';
+import { getVoicingsForChord, getVoicingFamilies, getVoicingForFamily, INSTRUMENT_MAX_FRETS } from './utils/voicings.js';
 
 const TUNINGS = {
     guitar: {
@@ -72,6 +72,8 @@ function App() {
     const [isMuted, setIsMuted] = useState(false);
     const [pdfOrientation, setPdfOrientation] = useState('landscape');
     const [activeUtilityPanel, setActiveUtilityPanel] = useState(null); // 'instrument', 'theme', 'zoom', 'print', null
+    const [voicingShape, setVoicingShape] = useState(savedSettings.voicingShape || null);
+    const [viewLayout, setViewLayout] = useState(savedSettings.viewLayout || 'single');
 
     // Progression State
     const [progKey, setProgKey] = useState(savedSettings.progKey || 'C');
@@ -94,7 +96,7 @@ function App() {
     useEffect(() => {
         const settings = {
             mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes,
-            theme, zoom, playbackMode, progKey, progQuality, selectedProgression,
+            theme, zoom, playbackMode, progKey, progQuality, selectedProgression, voicingShape, viewLayout,
             // Save current chords to the appropriate bucket, preserve the other from existing storage
             fretboardChords: mode === 'fretboard' ? chords : (savedSettings.fretboardChords || DEFAULT_CHORDS),
             progressionChords: mode === 'progression' ? chords : (savedSettings.progressionChords || DEFAULT_CHORDS)
@@ -113,7 +115,7 @@ function App() {
         }
 
         localStorage.setItem('fretforge_settings', JSON.stringify(settings, replacer));
-    }, [mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode, progKey, progQuality, selectedProgression, chords]);
+    }, [mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode, progKey, progQuality, selectedProgression, voicingShape, viewLayout, chords]);
 
     // Derived State
     const currentTuning = useMemo(() => {
@@ -123,11 +125,30 @@ function App() {
         return TUNINGS[instrument] || TUNINGS.guitar.standard;
     }, [instrument, guitarTuning]);
 
-    // Clear voicing selections when instrument changes; clamp numFrets to new instrument max
+    // Clear voicing/filter state when instrument changes; clamp numFrets to new instrument max
     useEffect(() => {
-        setChords(prev => prev.map(c => ({ ...c, selectedVoicing: null, visiblePositions: null })));
+        setChords(prev => prev.map(c => ({ ...c, visiblePositions: null, isFiltering: false })));
         setNumFrets(prev => Math.min(prev, INSTRUMENT_MAX_FRETS[instrument] || 24));
+        setVoicingShape(null);
     }, [instrument]);
+
+    // Auto-adjust numFrets to show the selected voicing shape across all chords
+    useEffect(() => {
+        if (!voicingShape) return;
+        let maxNeeded = 0;
+        chords.forEach(chord => {
+            const v = getVoicingForFamily(chord.root, chord.type, instrument, currentTuning, voicingShape);
+            if (v) {
+                const m = Math.max(...Array.from(v.positions).map(p => parseInt(p.split('-')[1])));
+                if (m > maxNeeded) maxNeeded = m;
+            }
+        });
+        setNumFrets(prev => {
+            const needed = maxNeeded + 2;
+            const cap = INSTRUMENT_MAX_FRETS[instrument] || 24;
+            return needed > prev ? Math.min(needed, cap) : prev;
+        });
+    }, [voicingShape, chords, instrument]);
 
     // Effects
     useEffect(() => {
@@ -265,9 +286,10 @@ function App() {
         const newChords = [...chords];
         newChords[index] = { ...newChords[index], [field]: value };
         
-        // Reset filter if parameters change
+        // Reset filter state if chord parameters change
         if (field === 'root' || field === 'type' || field === 'mode') {
             newChords[index].isFiltering = false;
+            newChords[index].visiblePositions = null;
 
             // Auto-select default mode for type
             if (field === 'type') {
@@ -276,44 +298,12 @@ function App() {
                     newChords[index].mode = options[0].value;
                 }
             }
-
-            // Recompute voicing if one is selected, otherwise clear
-            const chord = newChords[index];
-            if (chord.selectedVoicing) {
-                const voicings = getVoicingsForChord(chord.root, chord.type, instrument, currentTuning);
-                const match = voicings.find(v => v.name === chord.selectedVoicing);
-                chord.visiblePositions = match ? match.positions : null;
-                if (!match) chord.selectedVoicing = null;
-            } else {
-                chord.visiblePositions = null;
-            }
         }
         setChords(newChords);
     };
 
-    const handleVoicingChange = (index, voicingName) => {
-        const newChords = [...chords];
-        const chord = newChords[index];
-        if (!voicingName) {
-            chord.selectedVoicing = null;
-            chord.visiblePositions = null;
-        } else {
-            const voicings = getVoicingsForChord(chord.root, chord.type, instrument, currentTuning);
-            const match = voicings.find(v => v.name === voicingName);
-            if (match) {
-                chord.selectedVoicing = voicingName;
-                chord.visiblePositions = match.positions;
-                chord.isFiltering = false;
-                // Auto-expand fret view so the selected voicing is visible
-                const maxFret = Math.max(...Array.from(match.positions).map(p => parseInt(p.split('-')[1])));
-                setNumFrets(prev => {
-                    const needed = maxFret + 2;
-                    const cap = INSTRUMENT_MAX_FRETS[instrument] || 24;
-                    return needed > prev ? Math.min(needed, cap) : prev;
-                });
-            }
-        }
-        setChords(newChords);
+    const handleVoicingShapeChange = (shape) => {
+        setVoicingShape(shape || null);
     };
 
     const handleNoteClick = async (chordIndex, string, fret) => {
@@ -612,8 +602,12 @@ function App() {
             
             const nextRoot = (mode === 'progression' && showPassingNotes && i < chords.length - 1) ? chords[i+1].root : (mode === 'progression' && showPassingNotes ? chords[0].root : null);
             const label = `${chord.root} ${chord.type} (${chord.mode})`;
-            
-            drawFretboardOnCanvas(canvas, chord, label, nextRoot, printFrets, currentTuning);
+            const effectivePositions = chord.isFiltering
+                ? chord.visiblePositions
+                : (getVoicingForFamily(chord.root, chord.type, instrument, currentTuning, voicingShape)?.positions || null);
+            const chordForPdf = { ...chord, visiblePositions: effectivePositions };
+
+            drawFretboardOnCanvas(canvas, chordForPdf, label, nextRoot, printFrets, currentTuning);
             
             const pos = getPosition(indexOnPage);
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', pos.x, pos.y, pos.w, pos.h);
@@ -750,20 +744,43 @@ function App() {
                             <span className="utility-label">Help</span>
                         </button>
 
-                        {/* Fret Count Stepper */}
-                        <div className="fret-stepper" title="Adjust visible fret range (5 – instrument max)">
-                            <div className="fret-stepper-row">
-                                <button
-                                    className="fret-stepper-btn"
-                                    onClick={() => setNumFrets(n => Math.max(5, n - 1))}
-                                >−</button>
-                                <span className="fret-stepper-value">{numFrets}</span>
-                                <button
-                                    className="fret-stepper-btn"
-                                    onClick={() => setNumFrets(n => Math.min(INSTRUMENT_MAX_FRETS[instrument] || 24, n + 1))}
-                                >+</button>
+                        {/* Layout Toggle */}
+                        <button
+                            className={`utility-btn utility-toggle ${viewLayout === 'two-col' ? 'active' : ''}`}
+                            onClick={() => setViewLayout(l => l === 'single' ? 'two-col' : 'single')}
+                            title={viewLayout === 'single' ? 'Switch to 2-column layout (5 frets)' : 'Switch to single-column layout'}
+                        >
+                            <span className={`icon-mask ${viewLayout === 'two-col' ? 'icon-layout-2col' : 'icon-layout-1col'}`}></span>
+                            <span className="utility-label">{viewLayout === 'two-col' ? '2-col' : '1-col'}</span>
+                        </button>
+
+                        {/* Global Voicing Shape Selector */}
+                        {getVoicingFamilies(instrument).length > 0 && (
+                            <div className="voicing-ctrl">
+                                <select
+                                    className="voicing-select"
+                                    value={voicingShape || ''}
+                                    onChange={e => handleVoicingShapeChange(e.target.value)}
+                                >
+                                    <option value="">Full neck</option>
+                                    {getVoicingFamilies(instrument).map(f => (
+                                        <option key={f.value} value={f.value}>{f.label}</option>
+                                    ))}
+                                </select>
+                                <span className="voicing-ctrl-label">Voicing</span>
                             </div>
-                            <span className="fret-stepper-label">Frets</span>
+                        )}
+
+                        {/* Fret Count Stepper */}
+                        <div className={`fret-stepper${viewLayout === 'two-col' ? ' disabled' : ''}`} title="Adjust visible fret range">
+                            <div className="fret-wire" />
+                            <span className="fret-stepper-value">{viewLayout === 'two-col' ? 5 : numFrets}</span>
+                            <div className="fret-wire" />
+                            <div className="fret-stepper-row">
+                                <button className="fret-stepper-btn" onClick={() => setNumFrets(n => Math.max(5, n - 1))}>−</button>
+                                <span className="fret-stepper-label">Frets</span>
+                                <button className="fret-stepper-btn" onClick={() => setNumFrets(n => Math.min(INSTRUMENT_MAX_FRETS[instrument] || 24, n + 1))}>+</button>
+                            </div>
                         </div>
                     </div>
 
@@ -955,7 +972,7 @@ function App() {
                     marginTop: '20px'
                 }}
             >
-                <div id="fretboard-container">
+                <div id="fretboard-container" className={viewLayout === 'two-col' ? 'two-col' : ''}>
                     {chords.map((chord, index) => (
                         <div key={index} className="chord-section">
                             <div className="chord-controls">
@@ -1018,20 +1035,6 @@ function App() {
                                     </>
                                 )}
 
-                                {/* Voicing selector — guitar and ukulele only */}
-                                {getVoicingsForChord(chord.root, chord.type, instrument, currentTuning).length > 0 && (
-                                    <div className="input-group">
-                                        <select
-                                            value={chord.selectedVoicing || ''}
-                                            onChange={e => handleVoicingChange(index, e.target.value || null)}
-                                        >
-                                            <option value="">Full neck</option>
-                                            {getVoicingsForChord(chord.root, chord.type, instrument, currentTuning).map(v => (
-                                                <option key={v.name} value={v.name}>{v.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                )}
 
                                 {/* Remove chord button — fretboard mode, more than 1 chord */}
                                 {mode === 'fretboard' && chords.length > 1 && (
@@ -1083,16 +1086,20 @@ function App() {
                                 </div>
                             </div>
 
-                            <Fretboard 
+                            <Fretboard
                                 tuning={currentTuning}
-                                numFrets={numFrets}
+                                numFrets={viewLayout === 'two-col' ? 5 : numFrets}
                                 root={chord.root}
                                 chordType={chord.type}
                                 mode={chord.mode}
                                 nextChordRoot={mode === 'progression' ? (index < chords.length - 1 ? chords[index+1].root : chords[0].root) : null}
                                 showScaleNotes={showScaleNotes}
                                 showPassingNotes={showPassingNotes}
-                                visiblePositions={chord.visiblePositions}
+                                visiblePositions={
+                                    chord.isFiltering
+                                        ? chord.visiblePositions
+                                        : (getVoicingForFamily(chord.root, chord.type, instrument, currentTuning, voicingShape)?.positions || null)
+                                }
                                 isFilterMode={chord.isFiltering}
                                 onNoteClick={(s, f) => handleNoteClick(index, s, f)}
                                 instrument={instrument}
