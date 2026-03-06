@@ -132,6 +132,14 @@ function App() {
         setNeckPosition(null);
     }, [instrument]);
 
+    // Compute fretStart for two-col mode: start window 1 fret before the lowest fingered fret
+    const computeFretStart = (positions) => {
+        if (!positions || positions.size === 0) return 0;
+        const frets = Array.from(positions).map(k => parseInt(k.split('-')[1])).filter(f => f > 0);
+        if (frets.length === 0) return 0;
+        return Math.max(0, Math.min(...frets) - 1);
+    };
+
     // Auto-adjust numFrets across all chords when position changes
     useEffect(() => {
         if (neckPosition === null) return;
@@ -1090,26 +1098,31 @@ function App() {
                                 </div>
                             </div>
 
-                            <Fretboard
-                                tuning={currentTuning}
-                                numFrets={viewLayout === 'two-col' ? 5 : numFrets}
-                                root={chord.root}
-                                chordType={chord.type}
-                                mode={chord.mode}
-                                nextChordRoot={mode === 'progression' ? (index < chords.length - 1 ? chords[index+1].root : chords[0].root) : null}
-                                showScaleNotes={showScaleNotes}
-                                showPassingNotes={showPassingNotes}
-                                visiblePositions={
-                                    chord.isFiltering
-                                        ? chord.visiblePositions
-                                        : (neckPosition !== null
-                                            ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition)?.positions || null
-                                            : null)
-                                }
-                                isFilterMode={chord.isFiltering}
-                                onNoteClick={(s, f) => handleNoteClick(index, s, f)}
-                                instrument={instrument}
-                            />
+                            {(() => {
+                                const effectivePositions = chord.isFiltering
+                                    ? chord.visiblePositions
+                                    : (neckPosition !== null
+                                        ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition)?.positions || null
+                                        : null);
+                                const fretStart = viewLayout === 'two-col' ? computeFretStart(effectivePositions) : 0;
+                                return (
+                                    <Fretboard
+                                        tuning={currentTuning}
+                                        numFrets={viewLayout === 'two-col' ? 5 : numFrets}
+                                        fretStart={fretStart}
+                                        root={chord.root}
+                                        chordType={chord.type}
+                                        mode={chord.mode}
+                                        nextChordRoot={mode === 'progression' ? (index < chords.length - 1 ? chords[index+1].root : chords[0].root) : null}
+                                        showScaleNotes={showScaleNotes}
+                                        showPassingNotes={showPassingNotes}
+                                        visiblePositions={effectivePositions}
+                                        isFilterMode={chord.isFiltering}
+                                        onNoteClick={(s, f) => handleNoteClick(index, s, f)}
+                                        instrument={instrument}
+                                    />
+                                );
+                            })()}
                         </div>
                     ))}
 

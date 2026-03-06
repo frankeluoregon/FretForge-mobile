@@ -4,6 +4,7 @@ import { MusicTheory } from '../utils/musicTheory';
 const Fretboard = ({
     tuning,
     numFrets,
+    fretStart = 0,
     root,
     chordType,
     mode,
@@ -37,14 +38,15 @@ const Fretboard = ({
                         </div>
 
                         {/* Frets */}
-                        {Array.from({ length: numFrets + 1 }).map((_, fret) => {
+                        {Array.from({ length: numFrets + 1 }).map((_, fretIdx) => {
+                            const fret = fretStart + fretIdx;
                             const note = MusicTheory.transposeNote(openNote, fret);
-                            
+
                             // Logic for markers
                             const isChordTone = chordNotes.some(n => MusicTheory.areNotesEqual(note, n));
                             const isScaleNote = scaleNotes.some(n => MusicTheory.areNotesEqual(note, n));
                             const isRoot = MusicTheory.areNotesEqual(note, root);
-                            
+
                             const passingNote = showPassingNotes && nextChordRoot ? MusicTheory.transposeNote(nextChordRoot, -1) : null;
                             const isPassingNote = passingNote && MusicTheory.areNotesEqual(note, passingNote);
 
@@ -57,9 +59,9 @@ const Fretboard = ({
                             const shouldRenderMarker = (isFilterMode || isSelected) && isValidNote && !isPaired;
 
                             return (
-                                <div 
+                                <div
                                     key={fret}
-                                    className={`fret-cell fret-${fret} ${isPaired ? 'mandolin-paired-string' : ''}`}
+                                    className={`fret-cell fret-${fretIdx} ${isPaired ? 'mandolin-paired-string' : ''}`}
                                     onClick={() => onNoteClick && onNoteClick(stringIndex, fret)}
                                 >
                                     {shouldRenderMarker && (
