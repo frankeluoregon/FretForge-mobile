@@ -51,21 +51,39 @@ function computeGuitarPositionAtFret(template, anchorFret) {
     return fretPositions;
 }
 
-// For each string find the lowest chord tone at or above startFret
+// For each string find the lowest chord tone at or above startFret.
+// If the open string is a chord tone, always prefer fret 0.
 function computeUkulelePosition(root, chordType, tuning, startFret = 0) {
     const chordNotes = MusicTheory.getChordNotes(root, chordType);
     const fretPositions = new Set();
     tuning.forEach((openNote, strIdx) => {
         const openBase = MusicTheory.getNoteIndex(openNote);
+        const openIsChordTone = chordNotes.some(note =>
+            ((MusicTheory.getNoteIndex(note) - openBase) % 12 + 12) % 12 === 0
+        );
+        if (openIsChordTone) {
+            fretPositions.add(`${strIdx}-0`);
+            return;
+        }
         let bestFret = Infinity;
         for (const note of chordNotes) {
             let fret = ((MusicTheory.getNoteIndex(note) - openBase) % 12 + 12) % 12;
+            if (fret === 0) fret = 12; // open already handled above
             while (fret < startFret) fret += 12;
             if (fret < bestFret) bestFret = fret;
         }
         if (bestFret !== Infinity) fretPositions.add(`${strIdx}-${bestFret}`);
     });
     return fretPositions;
+}
+
+function getMinFrettedNote(fretPositions) {
+    let min = Infinity;
+    for (const pos of fretPositions) {
+        const fret = parseInt(pos.split('-')[1]);
+        if (fret > 0 && fret < min) min = fret;
+    }
+    return min === Infinity ? 0 : min;
 }
 
 function getRootFret(fretPositions, root, tuning) {
@@ -120,19 +138,19 @@ export function getPositionsForChord(root, chordType, instrument, tuning) {
         });
 
         const result = [];
-        const seenPositions = new Set();
+        const seenMinFrets = new Set();
         [...baseStartFrets].sort((a, b) => a - b).forEach(baseStartFret => {
             let startFret = baseStartFret;
             while (startFret <= maxFrets) {
-                if (!seenPositions.has(startFret)) {
-                    seenPositions.add(startFret);
-                    const fretPos = computeUkulelePosition(root, chordType, tuning, startFret);
-                    const maxFret = Math.max(...Array.from(fretPos).map(p => parseInt(p.split('-')[1])));
-                    if (maxFret <= maxFrets) {
-                        const rootFret = getRootFret(fretPos, root, tuning) ?? startFret;
+                const fretPos = computeUkulelePosition(root, chordType, tuning, startFret);
+                const maxFret = Math.max(...Array.from(fretPos).map(p => parseInt(p.split('-')[1])));
+                if (maxFret <= maxFrets) {
+                    const minFret = getMinFrettedNote(fretPos);
+                    if (!seenMinFrets.has(minFret)) {
+                        seenMinFrets.add(minFret);
                         result.push({
-                            name: `Fret ${rootFret}`,
-                            position: rootFret,
+                            name: `Fret ${minFret}`,
+                            position: minFret,
                             positions: fretPos,
                         });
                     }
