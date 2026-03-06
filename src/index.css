@@ -1730,49 +1730,109 @@ input[type="checkbox"] {
     transform: scale(0.96);
 }
 
-/* Global Voicing Shape Selector - utility bar */
-.voicing-ctrl {
+/* Position Slider - utility bar control */
+.position-ctrl {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 2px;
     padding: 4px 6px;
     border-radius: 6px;
+    min-width: 90px;
 }
 
-.voicing-select {
-    background: var(--bg-input);
-    color: var(--text-main);
-    border: 1px solid var(--border-dim);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 0.82em;
-    font-weight: 600;
+.position-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 90px;
+    height: 4px;
+    background: var(--fret-wire);
+    border-radius: 2px;
+    outline: none;
     cursor: pointer;
-    max-width: 90px;
+    transition: opacity 0.2s;
 }
 
-.voicing-select:hover {
-    border-color: var(--border-bright);
+.position-slider.inactive {
+    opacity: 0.35;
+    cursor: default;
 }
 
-.voicing-ctrl-label {
+.position-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--text-accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.position-slider.inactive::-webkit-slider-thumb {
+    background: var(--border-dim);
+    cursor: default;
+}
+
+.position-slider:not(.inactive)::-webkit-slider-thumb:hover {
+    background: var(--btn-hover);
+    transform: scale(1.2);
+}
+
+.position-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--text-accent);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+.position-slider.inactive::-moz-range-thumb {
+    background: var(--border-dim);
+    cursor: default;
+}
+
+.position-ctrl-footer {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.position-ctrl-label {
     font-size: 0.65em;
     color: var(--text-main);
     font-weight: 500;
 }
 
+.position-clear {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.15s, color 0.15s;
+}
+
+.position-clear:hover {
+    color: var(--text-highlight);
+    opacity: 1;
+}
+
 @media (max-width: 768px) {
-    .voicing-ctrl {
+    .position-ctrl {
         padding: 2px 4px;
+        min-width: 70px;
     }
 
-    .voicing-select {
-        font-size: 0.72em;
-        max-width: 72px;
+    .position-slider {
+        width: 70px;
     }
 
-    .voicing-ctrl-label {
+    .position-ctrl-label {
         font-size: 0.6em;
     }
 }

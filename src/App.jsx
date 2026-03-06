@@ -5,7 +5,7 @@ import { MusicTheory } from './utils/musicTheory';
 import { MIDIPlayer } from './utils/midi';
 import { Progressions } from './utils/progressions';
 import Logo from './components/Logo';
-import { getVoicingsForChord, getVoicingFamilies, getVoicingForFamily, INSTRUMENT_MAX_FRETS } from './utils/voicings.js';
+import { getPositionsForChord, getPositionAtFret, INSTRUMENT_MAX_FRETS } from './utils/positions.js';
 
 const TUNINGS = {
     guitar: {
@@ -72,7 +72,7 @@ function App() {
     const [isMuted, setIsMuted] = useState(false);
     const [pdfOrientation, setPdfOrientation] = useState('landscape');
     const [activeUtilityPanel, setActiveUtilityPanel] = useState(null); // 'instrument', 'theme', 'zoom', 'print', null
-    const [voicingShape, setVoicingShape] = useState(savedSettings.voicingShape || null);
+    const [neckPosition, setNeckPosition] = useState(savedSettings.neckPosition ?? null);
     const [viewLayout, setViewLayout] = useState(savedSettings.viewLayout || 'single');
 
     // Progression State
@@ -96,7 +96,7 @@ function App() {
     useEffect(() => {
         const settings = {
             mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes,
-            theme, zoom, playbackMode, progKey, progQuality, selectedProgression, voicingShape, viewLayout,
+            theme, zoom, playbackMode, progKey, progQuality, selectedProgression, neckPosition, viewLayout,
             // Save current chords to the appropriate bucket, preserve the other from existing storage
             fretboardChords: mode === 'fretboard' ? chords : (savedSettings.fretboardChords || DEFAULT_CHORDS),
             progressionChords: mode === 'progression' ? chords : (savedSettings.progressionChords || DEFAULT_CHORDS)
@@ -115,7 +115,7 @@ function App() {
         }
 
         localStorage.setItem('fretforge_settings', JSON.stringify(settings, replacer));
-    }, [mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode, progKey, progQuality, selectedProgression, voicingShape, viewLayout, chords]);
+    }, [mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode, progKey, progQuality, selectedProgression, neckPosition, viewLayout, chords]);
 
     // Derived State
     const currentTuning = useMemo(() => {
@@ -125,21 +125,21 @@ function App() {
         return TUNINGS[instrument] || TUNINGS.guitar.standard;
     }, [instrument, guitarTuning]);
 
-    // Clear voicing/filter state when instrument changes; clamp numFrets to new instrument max
+    // Clear position/filter state when instrument changes; clamp numFrets to new instrument max
     useEffect(() => {
         setChords(prev => prev.map(c => ({ ...c, visiblePositions: null, isFiltering: false })));
         setNumFrets(prev => Math.min(prev, INSTRUMENT_MAX_FRETS[instrument] || 24));
-        setVoicingShape(null);
+        setNeckPosition(null);
     }, [instrument]);
 
-    // Auto-adjust numFrets to show the selected voicing shape across all chords
+    // Auto-adjust numFrets across all chords when position changes
     useEffect(() => {
-        if (!voicingShape) return;
+        if (neckPosition === null) return;
         let maxNeeded = 0;
         chords.forEach(chord => {
-            const v = getVoicingForFamily(chord.root, chord.type, instrument, currentTuning, voicingShape);
-            if (v) {
-                const m = Math.max(...Array.from(v.positions).map(p => parseInt(p.split('-')[1])));
+            const p = getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition);
+            if (p) {
+                const m = Math.max(...Array.from(p.positions).map(s => parseInt(s.split('-')[1])));
                 if (m > maxNeeded) maxNeeded = m;
             }
         });
@@ -148,7 +148,7 @@ function App() {
             const cap = INSTRUMENT_MAX_FRETS[instrument] || 24;
             return needed > prev ? Math.min(needed, cap) : prev;
         });
-    }, [voicingShape, chords, instrument]);
+    }, [neckPosition, chords, instrument]);
 
     // Effects
     useEffect(() => {
@@ -302,9 +302,6 @@ function App() {
         setChords(newChords);
     };
 
-    const handleVoicingShapeChange = (shape) => {
-        setVoicingShape(shape || null);
-    };
 
     const handleNoteClick = async (chordIndex, string, fret) => {
         const chord = chords[chordIndex];
@@ -604,7 +601,9 @@ function App() {
             const label = `${chord.root} ${chord.type} (${chord.mode})`;
             const effectivePositions = chord.isFiltering
                 ? chord.visiblePositions
-                : (getVoicingForFamily(chord.root, chord.type, instrument, currentTuning, voicingShape)?.positions || null);
+                : (neckPosition !== null
+                    ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition)?.positions || null
+                    : null);
             const chordForPdf = { ...chord, visiblePositions: effectivePositions };
 
             drawFretboardOnCanvas(canvas, chordForPdf, label, nextRoot, printFrets, currentTuning);
@@ -754,20 +753,25 @@ function App() {
                             <span className="utility-label">{viewLayout === 'two-col' ? '2-col' : '1-col'}</span>
                         </button>
 
-                        {/* Global Voicing Shape Selector */}
-                        {getVoicingFamilies(instrument).length > 0 && (
-                            <div className="voicing-ctrl">
-                                <select
-                                    className="voicing-select"
-                                    value={voicingShape || ''}
-                                    onChange={e => handleVoicingShapeChange(e.target.value)}
-                                >
-                                    <option value="">Full neck</option>
-                                    {getVoicingFamilies(instrument).map(f => (
-                                        <option key={f.value} value={f.value}>{f.label}</option>
-                                    ))}
-                                </select>
-                                <span className="voicing-ctrl-label">Voicing</span>
+                        {/* Position Slider — guitar and ukulele only */}
+                        {(instrument === 'guitar' || instrument === 'ukulele') && (
+                            <div className="position-ctrl">
+                                <input
+                                    type="range"
+                                    className={`position-slider${neckPosition === null ? ' inactive' : ''}`}
+                                    min={0}
+                                    max={INSTRUMENT_MAX_FRETS[instrument]}
+                                    value={neckPosition ?? 0}
+                                    onChange={e => setNeckPosition(parseInt(e.target.value))}
+                                    onMouseDown={() => { if (neckPosition === null) setNeckPosition(0); }}
+                                    onTouchStart={() => { if (neckPosition === null) setNeckPosition(0); }}
+                                />
+                                <div className="position-ctrl-footer">
+                                    {neckPosition !== null && (
+                                        <button className="position-clear" onClick={() => setNeckPosition(null)} title="Full neck">×</button>
+                                    )}
+                                    <span className="position-ctrl-label">Position</span>
+                                </div>
                             </div>
                         )}
 
@@ -1098,7 +1102,9 @@ function App() {
                                 visiblePositions={
                                     chord.isFiltering
                                         ? chord.visiblePositions
-                                        : (getVoicingForFamily(chord.root, chord.type, instrument, currentTuning, voicingShape)?.positions || null)
+                                        : (neckPosition !== null
+                                            ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition)?.positions || null
+                                            : null)
                                 }
                                 isFilterMode={chord.isFiltering}
                                 onNoteClick={(s, f) => handleNoteClick(index, s, f)}

@@ -43,18 +43,18 @@ const GUITAR_TEMPLATES = {
     ],
 };
 
-function computeGuitarVoicingAtFret(template, anchorFret) {
-    const positions = new Set();
+function computeGuitarPositionAtFret(template, anchorFret) {
+    const fretPositions = new Set();
     template.offsets.forEach((offset, strIdx) => {
-        if (offset !== null) positions.add(`${strIdx}-${anchorFret + offset}`);
+        if (offset !== null) fretPositions.add(`${strIdx}-${anchorFret + offset}`);
     });
-    return positions;
+    return fretPositions;
 }
 
 // For each string find the lowest chord tone at or above startFret
-function computeUkuleleVoicing(root, chordType, tuning, startFret = 0) {
+function computeUkulelePosition(root, chordType, tuning, startFret = 0) {
     const chordNotes = MusicTheory.getChordNotes(root, chordType);
-    const positions = new Set();
+    const fretPositions = new Set();
     tuning.forEach((openNote, strIdx) => {
         const openBase = MusicTheory.getNoteIndex(openNote);
         let bestFret = Infinity;
@@ -63,14 +63,14 @@ function computeUkuleleVoicing(root, chordType, tuning, startFret = 0) {
             while (fret < startFret) fret += 12;
             if (fret < bestFret) bestFret = fret;
         }
-        if (bestFret !== Infinity) positions.add(`${strIdx}-${bestFret}`);
+        if (bestFret !== Infinity) fretPositions.add(`${strIdx}-${bestFret}`);
     });
-    return positions;
+    return fretPositions;
 }
 
-function getRootFret(positions, root, tuning) {
+function getRootFret(fretPositions, root, tuning) {
     let rootFret = Infinity;
-    for (const pos of positions) {
+    for (const pos of fretPositions) {
         const [strIdx, fret] = pos.split('-').map(Number);
         if (MusicTheory.areNotesEqual(MusicTheory.transposeNote(tuning[strIdx], fret), root)) {
             if (fret < rootFret) rootFret = fret;
@@ -79,16 +79,16 @@ function getRootFret(positions, root, tuning) {
     return rootFret === Infinity ? null : rootFret;
 }
 
-// Returns the voicing whose root position is closest to targetFret
-export function getVoicingAtPosition(root, chordType, instrument, tuning, targetFret) {
-    const voicings = getVoicingsForChord(root, chordType, instrument, tuning);
-    if (!voicings.length) return null;
-    return voicings.reduce((best, v) =>
-        Math.abs(v.position - targetFret) < Math.abs(best.position - targetFret) ? v : best
+// Returns the position closest to targetFret
+export function getPositionAtFret(root, chordType, instrument, tuning, targetFret) {
+    const positions = getPositionsForChord(root, chordType, instrument, tuning);
+    if (!positions.length) return null;
+    return positions.reduce((best, p) =>
+        Math.abs(p.position - targetFret) < Math.abs(best.position - targetFret) ? p : best
     );
 }
 
-export function getVoicingsForChord(root, chordType, instrument, tuning) {
+export function getPositionsForChord(root, chordType, instrument, tuning) {
     const maxFrets = INSTRUMENT_MAX_FRETS[instrument] || 24;
 
     if (instrument === 'guitar') {
@@ -102,7 +102,7 @@ export function getVoicingsForChord(root, chordType, instrument, tuning) {
                 result.push({
                     name: `${tpl.name} (${anchorFret})`,
                     position: anchorFret,
-                    positions: computeGuitarVoicingAtFret(tpl, anchorFret),
+                    positions: computeGuitarPositionAtFret(tpl, anchorFret),
                 });
                 anchorFret += 12;
             }
@@ -126,14 +126,14 @@ export function getVoicingsForChord(root, chordType, instrument, tuning) {
             while (startFret <= maxFrets) {
                 if (!seenPositions.has(startFret)) {
                     seenPositions.add(startFret);
-                    const pos = computeUkuleleVoicing(root, chordType, tuning, startFret);
-                    const maxFret = Math.max(...Array.from(pos).map(p => parseInt(p.split('-')[1])));
+                    const fretPos = computeUkulelePosition(root, chordType, tuning, startFret);
+                    const maxFret = Math.max(...Array.from(fretPos).map(p => parseInt(p.split('-')[1])));
                     if (maxFret <= maxFrets) {
-                        const rootFret = getRootFret(pos, root, tuning) ?? startFret;
+                        const rootFret = getRootFret(fretPos, root, tuning) ?? startFret;
                         result.push({
                             name: `Fret ${rootFret}`,
                             position: rootFret,
-                            positions: pos,
+                            positions: fretPos,
                         });
                     }
                 }
