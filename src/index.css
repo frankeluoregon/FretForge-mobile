@@ -2150,6 +2150,11 @@ input[type="checkbox"] {
     mask-image: url('/help.svg');
 }
 
+.icon-fretboard {
+    -webkit-mask-image: url('/fretboard.svg');
+    mask-image: url('/fretboard.svg');
+}
+
 /* Tray Icon Wrappers - position relative for flyout popups */
 .instrument-wrapper,
 .theme-wrapper {

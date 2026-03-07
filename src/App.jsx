@@ -761,39 +761,58 @@ function App() {
                             <span className="utility-label">{viewLayout === 'two-col' ? '2-col' : '1-col'}</span>
                         </button>
 
-                        {/* Position Slider — guitar and ukulele only */}
+                        {/* Fretboard mode toggle / position slider — guitar and ukulele only */}
                         {(instrument === 'guitar' || instrument === 'ukulele') && (
-                            <div className="position-ctrl">
-                                <input
-                                    type="range"
-                                    className={`position-slider${neckPosition === null ? ' inactive' : ''}`}
-                                    min={0}
-                                    max={INSTRUMENT_MAX_FRETS[instrument]}
-                                    value={neckPosition ?? 0}
-                                    onChange={e => setNeckPosition(parseInt(e.target.value))}
-                                    onMouseDown={() => { if (neckPosition === null) setNeckPosition(0); }}
-                                    onTouchStart={() => { if (neckPosition === null) setNeckPosition(0); }}
-                                />
-                                <div className="position-ctrl-footer">
-                                    {neckPosition !== null && (
-                                        <button className="position-clear" onClick={() => setNeckPosition(null)} title="Full neck">×</button>
-                                    )}
-                                    <span className="position-ctrl-label">Position</span>
+                            viewLayout === 'two-col' ? (
+                                /* Two-col: always show position slider */
+                                <div className="position-ctrl">
+                                    <input
+                                        type="range"
+                                        className={`position-slider${neckPosition === null ? ' inactive' : ''}`}
+                                        min={0}
+                                        max={INSTRUMENT_MAX_FRETS[instrument]}
+                                        value={neckPosition ?? 0}
+                                        onChange={e => setNeckPosition(parseInt(e.target.value))}
+                                        onMouseDown={() => { if (neckPosition === null) setNeckPosition(0); }}
+                                        onTouchStart={() => { if (neckPosition === null) setNeckPosition(0); }}
+                                    />
+                                    <div className="position-ctrl-footer">
+                                        {neckPosition !== null && (
+                                            <button className="position-clear" onClick={() => setNeckPosition(null)} title="Full neck">×</button>
+                                        )}
+                                        <span className="position-ctrl-label">Position</span>
+                                    </div>
                                 </div>
-                            </div>
+                            ) : neckPosition === null ? (
+                                /* Single-col, full fretboard: show fretboard icon to enter chord position mode */
+                                <button
+                                    className="utility-btn"
+                                    onClick={() => setNeckPosition(0)}
+                                    title="Switch to chord position mode"
+                                >
+                                    <span className="icon-mask icon-fretboard"></span>
+                                    <span className="utility-label">Full</span>
+                                </button>
+                            ) : (
+                                /* Single-col, chord position mode: show slider + back to full fretboard */
+                                <div className="position-ctrl">
+                                    <input
+                                        type="range"
+                                        className="position-slider"
+                                        min={0}
+                                        max={INSTRUMENT_MAX_FRETS[instrument]}
+                                        value={neckPosition}
+                                        onChange={e => setNeckPosition(parseInt(e.target.value))}
+                                    />
+                                    <div className="position-ctrl-footer">
+                                        <button className="position-clear" onClick={() => setNeckPosition(null)} title="Full fretboard">
+                                            <span className="icon-mask icon-fretboard" style={{width: '12px', height: '12px'}}></span>
+                                        </button>
+                                        <span className="position-ctrl-label">Position</span>
+                                    </div>
+                                </div>
+                            )
                         )}
-
-                        {/* Fret Count Stepper */}
-                        <div className={`fret-stepper${viewLayout === 'two-col' ? ' disabled' : ''}`} title="Adjust visible fret range">
-                            <div className="fret-wire" />
-                            <span className="fret-stepper-value">{viewLayout === 'two-col' ? 5 : numFrets}</span>
-                            <div className="fret-wire" />
-                            <div className="fret-stepper-row">
-                                <button className="fret-stepper-btn" onClick={() => setNumFrets(n => Math.max(5, n - 1))}>−</button>
-                                <span className="fret-stepper-label">Frets</span>
-                                <button className="fret-stepper-btn" onClick={() => setNumFrets(n => Math.min(INSTRUMENT_MAX_FRETS[instrument] || 24, n + 1))}>+</button>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Expandable Utility Panels */}
@@ -1104,7 +1123,7 @@ function App() {
                                     : (neckPosition !== null
                                         ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition)?.positions || null
                                         : null);
-                                const fretStart = viewLayout === 'two-col' ? computeFretStart(effectivePositions) : 0;
+                                const fretStart = viewLayout === 'two-col' && neckPosition > 0 ? computeFretStart(effectivePositions) : 0;
                                 return (
                                     <Fretboard
                                         tuning={currentTuning}
