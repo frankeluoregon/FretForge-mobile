@@ -764,15 +764,14 @@ function App() {
                         {/* Fretboard toggle + position slider — guitar and ukulele only */}
                         {(instrument === 'guitar' || instrument === 'ukulele') && (
                             <>
-                                {/* Fretboard icon: toggles between full neck and position mode (single-col only) */}
+                                {/* Text toggle: full neck vs position mode (single-col only) */}
                                 {viewLayout !== 'two-col' && (
                                     <button
-                                        className={`utility-btn ${neckPosition !== null ? 'active' : ''}`}
+                                        className={`neck-mode-toggle ${neckPosition !== null ? 'active' : ''}`}
                                         onClick={() => setNeckPosition(neckPosition !== null ? null : 0)}
                                         title={neckPosition !== null ? 'Back to full fretboard' : 'Switch to chord position mode'}
                                     >
-                                        <span className="icon-mask icon-fretboard"></span>
-                                        <span className="utility-label">{neckPosition !== null ? 'Pos' : 'Full'}</span>
+                                        {neckPosition !== null ? 'POSITION' : 'FULL NECK'}
                                     </button>
                                 )}
                                 {/* Position slider: visible in position mode (single-col) or always (two-col) */}

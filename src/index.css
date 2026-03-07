@@ -1754,6 +1754,32 @@ input[type="checkbox"] {
     transform: scale(0.96);
 }
 
+/* Neck mode toggle button */
+.neck-mode-toggle {
+    background: transparent;
+    border: 2px solid var(--border-dim);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-size: 0.7em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 6px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.neck-mode-toggle:hover {
+    border-color: var(--text-accent);
+    color: var(--text-highlight);
+}
+
+.neck-mode-toggle.active {
+    background: var(--btn-bg);
+    border-color: var(--btn-border);
+    color: var(--btn-text);
+}
+
 /* Position Slider - utility bar control */
 .position-slider {
     -webkit-appearance: none;
