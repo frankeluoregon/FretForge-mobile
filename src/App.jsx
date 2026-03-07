@@ -761,11 +761,22 @@ function App() {
                             <span className="utility-label">{viewLayout === 'two-col' ? '2-col' : '1-col'}</span>
                         </button>
 
-                        {/* Fretboard mode toggle / position slider — guitar and ukulele only */}
+                        {/* Fretboard toggle + position slider — guitar and ukulele only */}
                         {(instrument === 'guitar' || instrument === 'ukulele') && (
-                            viewLayout === 'two-col' ? (
-                                /* Two-col: always show position slider */
-                                <div className="position-ctrl">
+                            <>
+                                {/* Fretboard icon: toggles between full neck and position mode (single-col only) */}
+                                {viewLayout !== 'two-col' && (
+                                    <button
+                                        className={`utility-btn ${neckPosition !== null ? 'active' : ''}`}
+                                        onClick={() => setNeckPosition(neckPosition !== null ? null : 0)}
+                                        title={neckPosition !== null ? 'Back to full fretboard' : 'Switch to chord position mode'}
+                                    >
+                                        <span className="icon-mask icon-fretboard"></span>
+                                        <span className="utility-label">{neckPosition !== null ? 'Pos' : 'Full'}</span>
+                                    </button>
+                                )}
+                                {/* Position slider: visible in position mode (single-col) or always (two-col) */}
+                                {(neckPosition !== null || viewLayout === 'two-col') && (
                                     <input
                                         type="range"
                                         className={`position-slider${neckPosition === null ? ' inactive' : ''}`}
@@ -776,42 +787,8 @@ function App() {
                                         onMouseDown={() => { if (neckPosition === null) setNeckPosition(0); }}
                                         onTouchStart={() => { if (neckPosition === null) setNeckPosition(0); }}
                                     />
-                                    <div className="position-ctrl-footer">
-                                        {neckPosition !== null && (
-                                            <button className="position-clear" onClick={() => setNeckPosition(null)} title="Full neck">×</button>
-                                        )}
-                                        <span className="position-ctrl-label">Position</span>
-                                    </div>
-                                </div>
-                            ) : neckPosition === null ? (
-                                /* Single-col, full fretboard: show fretboard icon to enter chord position mode */
-                                <button
-                                    className="utility-btn"
-                                    onClick={() => setNeckPosition(0)}
-                                    title="Switch to chord position mode"
-                                >
-                                    <span className="icon-mask icon-fretboard"></span>
-                                    <span className="utility-label">Full</span>
-                                </button>
-                            ) : (
-                                /* Single-col, chord position mode: show slider + back to full fretboard */
-                                <div className="position-ctrl">
-                                    <input
-                                        type="range"
-                                        className="position-slider"
-                                        min={0}
-                                        max={INSTRUMENT_MAX_FRETS[instrument]}
-                                        value={neckPosition}
-                                        onChange={e => setNeckPosition(parseInt(e.target.value))}
-                                    />
-                                    <div className="position-ctrl-footer">
-                                        <button className="position-clear" onClick={() => setNeckPosition(null)} title="Full fretboard">
-                                            <span className="icon-mask icon-fretboard" style={{width: '12px', height: '12px'}}></span>
-                                        </button>
-                                        <span className="position-ctrl-label">Position</span>
-                                    </div>
-                                </div>
-                            )
+                                )}
+                            </>
                         )}
                     </div>
 
