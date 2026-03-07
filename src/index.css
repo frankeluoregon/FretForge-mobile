@@ -2609,6 +2609,20 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
     border-right: 3px solid var(--fret-wire);
 }
 
+.barre-bar {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    top: 0;
+    bottom: 0;
+    background: var(--text-accent);
+    opacity: 0.25;
+    border-radius: 7px;
+    z-index: 0;
+    pointer-events: none;
+}
+
 .fret-marker {
     width: 40px;
     height: 40px;

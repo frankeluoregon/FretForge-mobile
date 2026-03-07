@@ -19,6 +19,14 @@ const Fretboard = ({
     const chordNotes = useMemo(() => MusicTheory.getChordNotes(root, chordType), [root, chordType]);
     const scaleNotes = useMemo(() => MusicTheory.getScaleNotes(root, mode), [root, mode]);
 
+    // Barre fret: the lowest non-zero fret in the visible positions set (null when open/no position)
+    const barFret = useMemo(() => {
+        if (!visiblePositions || visiblePositions.size === 0) return null;
+        const frets = Array.from(visiblePositions).map(k => parseInt(k.split('-')[1])).filter(f => f > 0);
+        if (frets.length === 0) return null;
+        return Math.min(...frets);
+    }, [visiblePositions]);
+
     // Helper to check if string is a mandolin paired string (odd indices)
     const isMandolinPaired = (index) => instrument === 'mandolin' && index % 2 === 1;
 
@@ -58,12 +66,15 @@ const Fretboard = ({
                             const isSelected = visiblePositions ? visiblePositions.has(posKey) : true;
                             const shouldRenderMarker = (isFilterMode || isSelected) && isValidNote && !isPaired;
 
+                            const isBarreFret = barFret !== null && fret === barFret;
+
                             return (
                                 <div
                                     key={fret}
                                     className={`fret-cell fret-${fretIdx} ${isPaired ? 'mandolin-paired-string' : ''}`}
                                     onClick={() => onNoteClick && onNoteClick(stringIndex, fret)}
                                 >
+                                    {isBarreFret && !isPaired && <div className="barre-bar" />}
                                     {shouldRenderMarker && (
                                         <div className={`fret-marker
                                             ${isRoot ? 'root' : ''}

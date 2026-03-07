@@ -9,29 +9,35 @@ export const INSTRUMENT_MAX_FRETS = {
     mandolin: 18,
 };
 
-// Guitar barre chord templates
-// offsets indexed by stringIndex (0 = high E, 5 = low E); null = skip string
-// anchorString = string where root is placed
-const GUITAR_TEMPLATES = {
+// Barre chord templates derived from movable open chord shapes.
+// offsets[i] = frets above the barre for string i (0=high e … 5=low E).
+// null = string not played.
+// anchorString = string where root falls (determines barre fret).
+const GUITAR_BARRE_TEMPLATES = {
     major: [
-        { name: 'E-shape', anchorString: 5, offsets: [0, 0, 1, 2, 2, 0] },
-        { name: 'A-shape', anchorString: 4, offsets: [0, 2, 2, 2, 0, null] },
+        { name: 'E-shape',  anchorString: 5, offsets: [0, 0, 1, 2, 2, 0] },
+        { name: 'A-shape',  anchorString: 4, offsets: [0, 2, 2, 2, 0, null] },
+        { name: 'D-shape',  anchorString: 3, offsets: [2, 3, 2, 0, null, null] },
     ],
     minor: [
         { name: 'Em-shape', anchorString: 5, offsets: [0, 0, 0, 2, 2, 0] },
         { name: 'Am-shape', anchorString: 4, offsets: [0, 1, 2, 2, 0, null] },
+        { name: 'Dm-shape', anchorString: 3, offsets: [1, 3, 2, 0, null, null] },
     ],
     dominant7: [
         { name: 'E7-shape', anchorString: 5, offsets: [0, 0, 1, 0, 2, 0] },
         { name: 'A7-shape', anchorString: 4, offsets: [0, 2, 0, 2, 0, null] },
+        { name: 'D7-shape', anchorString: 3, offsets: [2, 1, 2, 0, null, null] },
     ],
     major7: [
         { name: 'Emaj7-shape', anchorString: 5, offsets: [0, 0, 1, 1, 2, 0] },
         { name: 'Amaj7-shape', anchorString: 4, offsets: [0, 2, 1, 2, 0, null] },
+        { name: 'Dmaj7-shape', anchorString: 3, offsets: [2, 2, 2, 0, null, null] },
     ],
     minor7: [
-        { name: 'Em7-shape', anchorString: 5, offsets: [0, 0, 0, 0, 2, 0] },
-        { name: 'Am7-shape', anchorString: 4, offsets: [0, 1, 0, 2, 0, null] },
+        { name: 'Em7-shape',  anchorString: 5, offsets: [0, 0, 0, 0, 2, 0] },
+        { name: 'Am7-shape',  anchorString: 4, offsets: [0, 1, 0, 2, 0, null] },
+        { name: 'Dm7-shape',  anchorString: 3, offsets: [1, 1, 2, 0, null, null] },
     ],
     diminished: [
         { name: 'Edim-shape', anchorString: 5, offsets: [null, null, 0, 2, 1, 0] },
@@ -43,61 +49,33 @@ const GUITAR_TEMPLATES = {
     ],
 };
 
-function computeGuitarPositionAtFret(template, anchorFret) {
-    const fretPositions = new Set();
+// Build a positions Set from a template at a given anchor fret.
+function computeBarrePositions(template, anchorFret) {
+    const positions = new Set();
     template.offsets.forEach((offset, strIdx) => {
-        if (offset !== null) fretPositions.add(`${strIdx}-${anchorFret + offset}`);
+        if (offset !== null) positions.add(`${strIdx}-${anchorFret + offset}`);
     });
-    return fretPositions;
+    return positions;
 }
 
-// For each string find the lowest chord tone at or above startFret.
-// If the open string is a chord tone, always prefer fret 0.
-function computeUkulelePosition(root, chordType, tuning, startFret = 0) {
+// Open position: for each string find the lowest chord tone at frets 0–4.
+// Prefers open strings; skips a string if no chord tone falls in range.
+function computeOpenPosition(root, chordType, tuning) {
     const chordNotes = MusicTheory.getChordNotes(root, chordType);
-    const fretPositions = new Set();
+    const positions = new Set();
     tuning.forEach((openNote, strIdx) => {
-        const openBase = MusicTheory.getNoteIndex(openNote);
-        const openIsChordTone = chordNotes.some(note =>
-            ((MusicTheory.getNoteIndex(note) - openBase) % 12 + 12) % 12 === 0
-        );
-        if (openIsChordTone) {
-            fretPositions.add(`${strIdx}-0`);
-            return;
+        for (let fret = 0; fret <= 4; fret++) {
+            const note = MusicTheory.transposeNote(openNote, fret);
+            if (chordNotes.some(n => MusicTheory.areNotesEqual(note, n))) {
+                positions.add(`${strIdx}-${fret}`);
+                break;
+            }
         }
-        let bestFret = Infinity;
-        for (const note of chordNotes) {
-            let fret = ((MusicTheory.getNoteIndex(note) - openBase) % 12 + 12) % 12;
-            if (fret === 0) fret = 12; // open already handled above
-            while (fret < startFret) fret += 12;
-            if (fret < bestFret) bestFret = fret;
-        }
-        if (bestFret !== Infinity) fretPositions.add(`${strIdx}-${bestFret}`);
     });
-    return fretPositions;
+    return positions;
 }
 
-function getMinFrettedNote(fretPositions) {
-    let min = Infinity;
-    for (const pos of fretPositions) {
-        const fret = parseInt(pos.split('-')[1]);
-        if (fret > 0 && fret < min) min = fret;
-    }
-    return min === Infinity ? 0 : min;
-}
-
-function getRootFret(fretPositions, root, tuning) {
-    let rootFret = Infinity;
-    for (const pos of fretPositions) {
-        const [strIdx, fret] = pos.split('-').map(Number);
-        if (MusicTheory.areNotesEqual(MusicTheory.transposeNote(tuning[strIdx], fret), root)) {
-            if (fret < rootFret) rootFret = fret;
-        }
-    }
-    return rootFret === Infinity ? null : rootFret;
-}
-
-// Returns the position closest to targetFret
+// Returns the position closest to targetFret.
 export function getPositionAtFret(root, chordType, instrument, tuning, targetFret) {
     const positions = getPositionsForChord(root, chordType, instrument, tuning);
     if (!positions.length) return null;
@@ -111,53 +89,83 @@ export function getPositionsForChord(root, chordType, instrument, tuning) {
 
     if (instrument === 'guitar') {
         const result = [];
-        for (const tpl of GUITAR_TEMPLATES[chordType] || []) {
+
+        // Position 0: open chord (first position, open strings)
+        const openPositions = computeOpenPosition(root, chordType, tuning);
+        if (openPositions.size > 0) {
+            result.push({
+                name: 'Open',
+                position: 0,
+                positions: openPositions,
+            });
+        }
+
+        // Barre positions: one per template shape, repeating up the neck
+        for (const tpl of GUITAR_BARRE_TEMPLATES[chordType] || []) {
             const rootIdx = MusicTheory.getNoteIndex(root);
             const anchorIdx = MusicTheory.getNoteIndex(tuning[tpl.anchorString]);
-            let anchorFret = ((rootIdx - anchorIdx) % 12 + 12) % 12;
             const maxOffset = Math.max(...tpl.offsets.filter(o => o !== null));
+
+            // Find first anchorFret >= 1 where root falls on the anchor string
+            let anchorFret = ((rootIdx - anchorIdx) % 12 + 12) % 12;
+            if (anchorFret === 0) anchorFret = 12; // fret 0 is covered by open position
+
             while (anchorFret + maxOffset <= maxFrets) {
                 result.push({
                     name: `${tpl.name} (${anchorFret})`,
                     position: anchorFret,
-                    positions: computeGuitarPositionAtFret(tpl, anchorFret),
+                    positions: computeBarrePositions(tpl, anchorFret),
                 });
                 anchorFret += 12;
             }
         }
+
+        // Sort by position so the slider moves logically up the neck
+        result.sort((a, b) => a.position - b.position);
         return result;
     }
 
     if (instrument === 'ukulele') {
+        const chordNotes = MusicTheory.getChordNotes(root, chordType);
+        const result = [];
+
+        // Position 0: open chord (frets 0–4)
+        const openPositions = computeOpenPosition(root, chordType, tuning);
+        if (openPositions.size > 0) {
+            result.push({ name: 'Open', position: 0, positions: openPositions });
+        }
+
+        // Higher positions: for each fret where root appears on any string,
+        // build a voicing by finding nearest chord tone per string within a 4-fret window.
         const rootIdx = MusicTheory.getNoteIndex(root);
-        // Collect all frets (0–11) where root appears on any string
-        const baseStartFrets = new Set();
+        const seenAnchors = new Set([0]);
+
         tuning.forEach((openNote) => {
             const openBase = MusicTheory.getNoteIndex(openNote);
-            baseStartFrets.add(((rootIdx - openBase) % 12 + 12) % 12);
-        });
+            let anchor = ((rootIdx - openBase) % 12 + 12) % 12;
+            if (anchor === 0) anchor = 12;
 
-        const result = [];
-        const seenMinFrets = new Set();
-        [...baseStartFrets].sort((a, b) => a - b).forEach(baseStartFret => {
-            let startFret = baseStartFret;
-            while (startFret <= maxFrets) {
-                const fretPos = computeUkulelePosition(root, chordType, tuning, startFret);
-                const maxFret = Math.max(...Array.from(fretPos).map(p => parseInt(p.split('-')[1])));
-                if (maxFret <= maxFrets) {
-                    const minFret = getMinFrettedNote(fretPos);
-                    if (!seenMinFrets.has(minFret)) {
-                        seenMinFrets.add(minFret);
-                        result.push({
-                            name: `Fret ${minFret}`,
-                            position: minFret,
-                            positions: fretPos,
-                        });
+            while (anchor <= maxFrets) {
+                if (!seenAnchors.has(anchor)) {
+                    seenAnchors.add(anchor);
+                    const positions = new Set();
+                    tuning.forEach((strOpen, strIdx) => {
+                        for (let fret = anchor; fret <= anchor + 4; fret++) {
+                            const note = MusicTheory.transposeNote(strOpen, fret);
+                            if (chordNotes.some(n => MusicTheory.areNotesEqual(note, n))) {
+                                if (fret <= maxFrets) positions.add(`${strIdx}-${fret}`);
+                                break;
+                            }
+                        }
+                    });
+                    if (positions.size > 0) {
+                        result.push({ name: `Fret ${anchor}`, position: anchor, positions });
                     }
                 }
-                startFret += 12;
+                anchor += 12;
             }
         });
+
         result.sort((a, b) => a.position - b.position);
         return result;
     }
