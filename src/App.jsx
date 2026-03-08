@@ -383,7 +383,7 @@ function App() {
     };
 
     const resetFretboardSettings = () => {
-        if (window.confirm('Reset fretboard view settings to default?')) {
+        if (window.confirm('Reset to defaults?')) {
             if (window.innerWidth <= 768) {
                 setNumFrets(window.innerWidth > window.innerHeight ? 12 : 5);
             } else {
@@ -391,7 +391,13 @@ function App() {
                 setNumFrets(Math.min(INSTRUMENT_MAX_FRETS[instrument] || 24, Math.max(12, Math.floor(availableWidth / 80))));
             }
             setZoom(100);
-            setChords(mode === 'progression' ? (savedSettings.progressionChords || DEFAULT_CHORDS) : DEFAULT_CHORDS);
+            setNeckPosition(null);
+            setShowScaleNotes(true);
+            setShowPassingNotes(false);
+            setChords(DEFAULT_CHORDS);
+            setProgKey('C');
+            setProgQuality('major');
+            setSelectedProgression('');
         }
     };
 
