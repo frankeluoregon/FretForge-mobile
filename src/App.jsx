@@ -102,6 +102,9 @@ function App() {
     // Capo — applies to guitar, ukulele, mandolin; 0 = no capo
     const [capo, setCapo] = useState(savedSettings.capo || 0);
 
+    // Solo mode — guitar and ukulele only; uses algorithmic neck patterns instead of chords-db voicings
+    const [soloMode, setSoloMode] = useState(savedSettings.soloMode ?? false);
+
 
     // Progression State
     const [progKey, setProgKey] = useState(savedSettings.progKey || 'C');
@@ -123,7 +126,7 @@ function App() {
     // Persistence Effect
     useEffect(() => {
         const settings = {
-            mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo,
+            mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo, soloMode,
             numFrets, showScaleNotes, showPassingNotes,
             theme, zoom, playbackMode, progKey, progQuality, selectedProgression, neckPosition, viewLayout,
             // Save current chords to the appropriate bucket, preserve the other from existing storage
@@ -144,7 +147,7 @@ function App() {
         }
 
         localStorage.setItem('fretforge_settings', JSON.stringify(settings, replacer));
-    }, [mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo,
+    }, [mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo, soloMode,
         numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode,
         progKey, progQuality, selectedProgression, neckPosition, viewLayout, chords]);
 
@@ -161,12 +164,14 @@ function App() {
         setChords(prev => prev.map(c => ({ ...c, visiblePositions: null, isFiltering: false })));
         setNumFrets(prev => Math.min(prev, INSTRUMENT_MAX_FRETS[instrument] || 24));
         setNeckPosition(null);
-        if (!STRUMMED_INSTRUMENTS.has(instrument)) setCapo(0);
+        if (!STRUMMED_INSTRUMENTS.has(instrument)) { setCapo(0); setSoloMode(false); }
     }, [instrument]);
 
-    // Get position entries for a chord, preferring chords-db fingerings when available
+    // Get position entries for a chord.
+    // In solo mode (guitar/ukulele) uses algorithmic neck positions like bass.
+    // Otherwise prefers chords-db discrete voicings for strummed instruments.
     const getChordPositions = useCallback((root, chordType) => {
-        if (STRUMMED_INSTRUMENTS.has(instrument)) {
+        if (STRUMMED_INSTRUMENTS.has(instrument) && !soloMode) {
             const dbFingerings = getChordFingerings(instrument, root, chordType);
             const standardTuning = STANDARD_TUNINGS[instrument];
             const entries = fingeringsToPositionEntries(
@@ -175,7 +180,16 @@ function App() {
             if (entries) return entries;
         }
         return getPositionsForChord(root, chordType, instrument, currentTuning);
-    }, [instrument, capo, currentTuning]);
+    }, [instrument, capo, soloMode, currentTuning]);
+
+    // Max voicing count across all current chords — used as slider range for strummed instruments
+    const maxVoicingCount = useMemo(() => {
+        if (!STRUMMED_INSTRUMENTS.has(instrument) || chords.length === 0) return 1;
+        return Math.max(...chords.map(c => {
+            const pos = getChordPositions(c.root, c.type);
+            return pos?.length || 1;
+        }), 1);
+    }, [instrument, chords, getChordPositions]);
 
     // Compute fretStart for two-col mode: start window 1 fret before the lowest fingered fret
     const computeFretStart = (positions) => {
@@ -191,7 +205,9 @@ function App() {
         let maxNeeded = 0;
         chords.forEach(chord => {
             const allPositions = getChordPositions(chord.root, chord.type);
-            const p = getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions);
+            const p = (STRUMMED_INSTRUMENTS.has(instrument) && !soloMode)
+                ? allPositions[Math.min(neckPosition, allPositions.length - 1)]
+                : getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions);
             if (p) {
                 const m = Math.max(...Array.from(p.positions).map(s => parseInt(s.split('-')[1])));
                 if (m > maxNeeded) maxNeeded = m;
@@ -660,10 +676,13 @@ function App() {
             
             const nextRoot = (mode === 'progression' && showPassingNotes && i < chords.length - 1) ? chords[i+1].root : (mode === 'progression' && showPassingNotes ? chords[0].root : null);
             const label = `${chord.root} ${chord.type} (${chord.mode})`;
+            const allPosPdf = getChordPositions(chord.root, chord.type);
             const effectivePositions = chord.isFiltering
                 ? chord.visiblePositions
                 : (neckPosition !== null
-                    ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition)?.positions || null
+                    ? ((STRUMMED_INSTRUMENTS.has(instrument) && !soloMode)
+                        ? allPosPdf[Math.min(neckPosition, allPosPdf.length - 1)]?.positions || null
+                        : getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPosPdf)?.positions || null)
                     : null);
             const chordForPdf = { ...chord, visiblePositions: effectivePositions };
 
@@ -814,26 +833,37 @@ function App() {
                             <span className="utility-label">{viewLayout === 'two-col' ? '2-col' : '1-col'}</span>
                         </button>
 
-                        {/* Fretboard toggle + position slider — guitar and ukulele only */}
+                        {/* Solo/Chord mode toggle — guitar and ukulele only */}
                         {(instrument === 'guitar' || instrument === 'ukulele') && (
+                            <button
+                                className={`utility-btn utility-toggle ${soloMode ? 'active' : ''}`}
+                                onClick={() => { setSoloMode(s => !s); setNeckPosition(null); }}
+                                title={soloMode ? 'Switch to chord voicing mode' : 'Switch to solo/scale mode (algorithmic)'}
+                            >
+                                <span className="utility-label">{soloMode ? 'SOLO' : 'CHORD'}</span>
+                            </button>
+                        )}
+
+                        {/* Voicing/position toggle + slider — strummed instruments only */}
+                        {STRUMMED_INSTRUMENTS.has(instrument) && (
                             <>
-                                {/* Text toggle: full neck vs position mode (single-col only) */}
+                                {/* Text toggle: full neck vs voicing/position mode (single-col only) */}
                                 {viewLayout !== 'two-col' && (
                                     <button
                                         className={`neck-mode-toggle ${neckPosition !== null ? 'active' : ''}`}
                                         onClick={() => setNeckPosition(neckPosition !== null ? null : 0)}
-                                        title={neckPosition !== null ? 'Back to full fretboard' : 'Switch to chord position mode'}
+                                        title={neckPosition !== null ? 'Back to full fretboard' : soloMode ? 'Lock to a neck position' : 'Step through chord voicings'}
                                     >
-                                        {neckPosition !== null ? 'POSITION' : 'FULL NECK'}
+                                        {neckPosition !== null ? (soloMode ? 'POSITION' : 'VOICING') : 'FULL NECK'}
                                     </button>
                                 )}
-                                {/* Position slider: visible in position mode (single-col) or always (two-col) */}
+                                {/* Slider: voicing index in chord mode, fret number in solo mode */}
                                 {(neckPosition !== null || viewLayout === 'two-col') && (
                                     <input
                                         type="range"
                                         className={`position-slider${neckPosition === null ? ' inactive' : ''}`}
                                         min={0}
-                                        max={INSTRUMENT_MAX_FRETS[instrument]}
+                                        max={soloMode ? INSTRUMENT_MAX_FRETS[instrument] : maxVoicingCount - 1}
                                         value={neckPosition ?? 0}
                                         onChange={e => setNeckPosition(parseInt(e.target.value))}
                                         onMouseDown={() => { if (neckPosition === null) setNeckPosition(0); }}
@@ -1184,13 +1214,13 @@ function App() {
                                 </div>
                             </div>
 
-                            {/* Chord box diagram — guitar and ukulele only (chords-db coverage) */}
-                            {(instrument === 'guitar' || instrument === 'ukulele') && (
+                            {/* Chord box diagram — guitar and ukulele only, hidden in solo mode */}
+                            {(instrument === 'guitar' || instrument === 'ukulele') && !soloMode && (
                                 <ChordDiagram
                                     instrument={instrument}
                                     root={chord.root}
                                     chordType={chord.type}
-                                    capo={capo}
+                                    positionIndex={neckPosition ?? 0}
                                 />
                             )}
 
@@ -1199,7 +1229,9 @@ function App() {
                                 const effectivePositions = chord.isFiltering
                                     ? chord.visiblePositions
                                     : (neckPosition !== null
-                                        ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions)?.positions || null
+                                        ? ((STRUMMED_INSTRUMENTS.has(instrument) && !soloMode)
+                                            ? allPositions[Math.min(neckPosition, allPositions.length - 1)]?.positions || null
+                                            : getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions)?.positions || null)
                                         : null);
                                 // When capo is active, start the fretboard view just before the capo
                                 const fretStart = capo > 0
