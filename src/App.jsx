@@ -6,9 +6,9 @@ import { MIDIPlayer } from './utils/midi';
 import { Progressions } from './utils/progressions';
 import Logo from './components/Logo';
 import { getPositionsForChord, getPositionAtFret, fingeringsToPositionEntries, INSTRUMENT_MAX_FRETS } from './utils/positions.js';
+import ChordDiagram from './components/ChordDiagram.jsx';
 import { getChordFingerings, STRUMMED_INSTRUMENTS } from './utils/chordsDb.js';
 import { soundingRoot } from './utils/tuningTransposer.js';
-import ChordDiagram from './components/ChordDiagram.jsx';
 
 const TUNINGS = {
     guitar: {
@@ -122,6 +122,9 @@ function App() {
     // Ref to instrument for use inside resize closure (avoids stale closure)
     const instrumentRef = useRef(instrument);
     useEffect(() => { instrumentRef.current = instrument; }, [instrument]);
+
+    // Refs to hidden off-screen chord diagram containers (for PDF export in chord mode)
+    const diagramRefs = useRef([]);
 
     // Persistence Effect
     useEffect(() => {
@@ -590,7 +593,7 @@ function App() {
         }
     };
 
-    const exportToPDF = () => {
+    const exportToPDF = async () => {
         const orientation = pdfOrientation === 'landscape' ? 'l' : 'p';
         const pdf = new jsPDF(orientation, 'mm', 'a4');
         
@@ -666,14 +669,17 @@ function App() {
             }
         }
 
-        chords.forEach((chord, i) => {
+        const isChordMode = (instrument === 'guitar' || instrument === 'ukulele') && !soloMode;
+
+        for (let i = 0; i < chords.length; i++) {
+            const chord = chords[i];
             const pageIndex = Math.floor(i / itemsPerPage);
             const indexOnPage = i % itemsPerPage;
-            
+
             if (indexOnPage === 0 && pageIndex > 0) {
                 pdf.addPage();
             }
-            
+
             const nextRoot = (mode === 'progression' && showPassingNotes && i < chords.length - 1) ? chords[i+1].root : (mode === 'progression' && showPassingNotes ? chords[0].root : null);
             const label = `${chord.root} ${chord.type} (${chord.mode})`;
             const allPosPdf = getChordPositions(chord.root, chord.type);
@@ -687,10 +693,30 @@ function App() {
             const chordForPdf = { ...chord, visiblePositions: effectivePositions };
 
             drawFretboardOnCanvas(canvas, chordForPdf, label, nextRoot, printFrets, currentTuning);
-            
+
+            // In chord mode, composite the chord box diagram in the top-right corner
+            if (isChordMode) {
+                const svgEl = diagramRefs.current[i]?.querySelector('svg');
+                if (svgEl) {
+                    await new Promise(resolve => {
+                        const svgStr = new XMLSerializer().serializeToString(svgEl);
+                        const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+                        const img = new Image();
+                        img.onload = () => {
+                            const ctx = canvas.getContext('2d');
+                            const size = Math.round(canvas.height * 0.72); // ~324px on a 450px canvas
+                            ctx.drawImage(img, canvas.width - size - 10, (canvas.height - size) / 2, size, size);
+                            resolve();
+                        };
+                        img.onerror = resolve;
+                        img.src = url;
+                    });
+                }
+            }
+
             const pos = getPosition(indexOnPage);
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', pos.x, pos.y, pos.w, pos.h);
-        });
+        }
         pdf.save('fretforge-export.pdf');
         setShowPdfOptions(false);
     };
@@ -1214,16 +1240,6 @@ function App() {
                                 </div>
                             </div>
 
-                            {/* Chord box diagram — guitar and ukulele only, hidden in solo mode */}
-                            {(instrument === 'guitar' || instrument === 'ukulele') && !soloMode && (
-                                <ChordDiagram
-                                    instrument={instrument}
-                                    root={chord.root}
-                                    chordType={chord.type}
-                                    positionIndex={neckPosition ?? 0}
-                                />
-                            )}
-
                             {(() => {
                                 const allPositions = getChordPositions(chord.root, chord.type);
                                 const effectivePositions = chord.isFiltering
@@ -1270,6 +1286,22 @@ function App() {
             <footer className="app-footer">
                 &copy; 2026 <a href="https://canvasback.us" target="_blank" rel="noopener noreferrer">Canvasback Solutions</a>
             </footer>
+
+            {/* Off-screen chord diagrams for PDF export — not visible to user */}
+            {(instrument === 'guitar' || instrument === 'ukulele') && !soloMode && (
+                <div style={{ position: 'fixed', left: '-9999px', top: 0, visibility: 'hidden' }}>
+                    {chords.map((chord, i) => (
+                        <div key={i} ref={el => { diagramRefs.current[i] = el; }}>
+                            <ChordDiagram
+                                instrument={instrument}
+                                root={chord.root}
+                                chordType={chord.type}
+                                positionIndex={neckPosition ?? 0}
+                            />
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
