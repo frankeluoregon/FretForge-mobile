@@ -1,23 +1,43 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { jsPDF } from "jspdf";
 import Fretboard from './components/Fretboard';
 import { MusicTheory } from './utils/musicTheory';
 import { MIDIPlayer } from './utils/midi';
 import { Progressions } from './utils/progressions';
 import Logo from './components/Logo';
-import { getPositionsForChord, getPositionAtFret, INSTRUMENT_MAX_FRETS } from './utils/positions.js';
+import { getPositionsForChord, getPositionAtFret, fingeringsToPositionEntries, INSTRUMENT_MAX_FRETS } from './utils/positions.js';
+import { getChordFingerings, STRUMMED_INSTRUMENTS } from './utils/chordsDb.js';
+import { soundingRoot } from './utils/tuningTransposer.js';
+import ChordDiagram from './components/ChordDiagram.jsx';
 
 const TUNINGS = {
     guitar: {
         standard: ['E', 'B', 'G', 'D', 'A', 'E'],
-        dropD: ['E', 'B', 'G', 'D', 'A', 'D'],
-        dadgad: ['D', 'A', 'G', 'D', 'A', 'D']
+        dropD:    ['E', 'B', 'G', 'D', 'A', 'D'],
+        openG:    ['D', 'B', 'G', 'D', 'G', 'D'],
+        openD:    ['D', 'A', 'F#', 'D', 'A', 'D'],
+        dadgad:   ['D', 'A', 'G', 'D', 'A', 'D'],
+        halfDown: ['D#', 'A#', 'F#', 'C#', 'G#', 'D#'],
     },
     bass4: ['G', 'D', 'A', 'E'],
     bass5: ['G', 'D', 'A', 'E', 'B'],
     bass6: ['C', 'G', 'D', 'A', 'E', 'B'],
-    ukulele: ['A', 'E', 'C', 'G'],
-    mandolin: ['E', 'E', 'A', 'A', 'D', 'D', 'G', 'G']
+    ukulele: {
+        standard: ['A', 'E', 'C', 'G'],   // GCEA re-entrant (standard)
+        dTuning:  ['B', 'F#', 'D', 'A'],  // D tuning (one step up)
+        baritone: ['E', 'B', 'G', 'D'],   // DGBE — same as guitar's top 4 strings
+    },
+    mandolin: {
+        standard: ['E', 'E', 'A', 'A', 'D', 'D', 'G', 'G'],  // GDAE (standard)
+        openG:    ['D', 'D', 'G', 'G', 'D', 'D', 'G', 'G'],  // GDGD (cross/open G)
+    },
+};
+
+// Standard tunings used as source reference when SmartChord fingerings are transposed
+const STANDARD_TUNINGS = {
+    guitar:   TUNINGS.guitar.standard,
+    ukulele:  TUNINGS.ukulele.standard,
+    mandolin: TUNINGS.mandolin.standard,
 };
 
 const DEFAULT_CHORDS = [
@@ -75,6 +95,14 @@ function App() {
     const [neckPosition, setNeckPosition] = useState(savedSettings.neckPosition ?? null);
     const [viewLayout, setViewLayout] = useState(savedSettings.viewLayout || 'single');
 
+    // Alternate tuning state (guitar uses guitarTuning above; uke and mandolin get their own)
+    const [ukuleleTuning, setUkuleleTuning] = useState(savedSettings.ukuleleTuning || 'standard');
+    const [mandolinTuning, setMandolinTuning] = useState(savedSettings.mandolinTuning || 'standard');
+
+    // Capo — applies to guitar, ukulele, mandolin; 0 = no capo
+    const [capo, setCapo] = useState(savedSettings.capo || 0);
+
+
     // Progression State
     const [progKey, setProgKey] = useState(savedSettings.progKey || 'C');
     const [progQuality, setProgQuality] = useState(savedSettings.progQuality || 'major');
@@ -95,7 +123,8 @@ function App() {
     // Persistence Effect
     useEffect(() => {
         const settings = {
-            mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes,
+            mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo,
+            numFrets, showScaleNotes, showPassingNotes,
             theme, zoom, playbackMode, progKey, progQuality, selectedProgression, neckPosition, viewLayout,
             // Save current chords to the appropriate bucket, preserve the other from existing storage
             fretboardChords: mode === 'fretboard' ? chords : (savedSettings.fretboardChords || DEFAULT_CHORDS),
@@ -115,22 +144,38 @@ function App() {
         }
 
         localStorage.setItem('fretforge_settings', JSON.stringify(settings, replacer));
-    }, [mode, instrument, guitarTuning, numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode, progKey, progQuality, selectedProgression, neckPosition, viewLayout, chords]);
+    }, [mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo,
+        numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode,
+        progKey, progQuality, selectedProgression, neckPosition, viewLayout, chords]);
 
     // Derived State
     const currentTuning = useMemo(() => {
-        if (instrument === 'guitar') {
-            return TUNINGS.guitar[guitarTuning] || TUNINGS.guitar.standard;
-        }
+        if (instrument === 'guitar')   return TUNINGS.guitar[guitarTuning]     || TUNINGS.guitar.standard;
+        if (instrument === 'ukulele')  return TUNINGS.ukulele[ukuleleTuning]   || TUNINGS.ukulele.standard;
+        if (instrument === 'mandolin') return TUNINGS.mandolin[mandolinTuning] || TUNINGS.mandolin.standard;
         return TUNINGS[instrument] || TUNINGS.guitar.standard;
-    }, [instrument, guitarTuning]);
+    }, [instrument, guitarTuning, ukuleleTuning, mandolinTuning]);
 
     // Clear position/filter state when instrument changes; clamp numFrets to new instrument max
     useEffect(() => {
         setChords(prev => prev.map(c => ({ ...c, visiblePositions: null, isFiltering: false })));
         setNumFrets(prev => Math.min(prev, INSTRUMENT_MAX_FRETS[instrument] || 24));
         setNeckPosition(null);
+        if (!STRUMMED_INSTRUMENTS.has(instrument)) setCapo(0);
     }, [instrument]);
+
+    // Get position entries for a chord, preferring chords-db fingerings when available
+    const getChordPositions = useCallback((root, chordType) => {
+        if (STRUMMED_INSTRUMENTS.has(instrument)) {
+            const dbFingerings = getChordFingerings(instrument, root, chordType);
+            const standardTuning = STANDARD_TUNINGS[instrument];
+            const entries = fingeringsToPositionEntries(
+                dbFingerings, capo, standardTuning, currentTuning, INSTRUMENT_MAX_FRETS[instrument]
+            );
+            if (entries) return entries;
+        }
+        return getPositionsForChord(root, chordType, instrument, currentTuning);
+    }, [instrument, capo, currentTuning]);
 
     // Compute fretStart for two-col mode: start window 1 fret before the lowest fingered fret
     const computeFretStart = (positions) => {
@@ -145,7 +190,8 @@ function App() {
         if (neckPosition === null) return;
         let maxNeeded = 0;
         chords.forEach(chord => {
-            const p = getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition);
+            const allPositions = getChordPositions(chord.root, chord.type);
+            const p = getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions);
             if (p) {
                 const m = Math.max(...Array.from(p.positions).map(s => parseInt(s.split('-')[1])));
                 if (m > maxNeeded) maxNeeded = m;
@@ -156,7 +202,7 @@ function App() {
             const cap = INSTRUMENT_MAX_FRETS[instrument] || 24;
             return needed > prev ? Math.min(needed, cap) : prev;
         });
-    }, [neckPosition, chords, instrument]);
+    }, [neckPosition, chords, instrument, getChordPositions]);
 
     // Effects
     useEffect(() => {
@@ -398,6 +444,7 @@ function App() {
             setProgKey('C');
             setProgQuality('major');
             setSelectedProgression('');
+            setCapo(0);
         }
     };
 
@@ -819,8 +866,41 @@ function App() {
                                             <label>Tuning</label>
                                             <select value={guitarTuning} onChange={(e) => setGuitarTuning(e.target.value)}>
                                                 <option value="standard">Standard (EADGBE)</option>
-                                                <option value="dropD">Drop D</option>
+                                                <option value="dropD">Drop D (DADGBE)</option>
+                                                <option value="openG">Open G (DGDGBD)</option>
+                                                <option value="openD">Open D (DADF#AD)</option>
                                                 <option value="dadgad">DADGAD</option>
+                                                <option value="halfDown">Half Step Down (Eb)</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                    {instrument === 'ukulele' && (
+                                        <div className="panel-row">
+                                            <label>Tuning</label>
+                                            <select value={ukuleleTuning} onChange={(e) => setUkuleleTuning(e.target.value)}>
+                                                <option value="standard">Standard (GCEA)</option>
+                                                <option value="dTuning">D Tuning (ADF♯B)</option>
+                                                <option value="baritone">Baritone (DGBE)</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                    {instrument === 'mandolin' && (
+                                        <div className="panel-row">
+                                            <label>Tuning</label>
+                                            <select value={mandolinTuning} onChange={(e) => setMandolinTuning(e.target.value)}>
+                                                <option value="standard">Standard (GDAE)</option>
+                                                <option value="openG">Open G (GDGD)</option>
+                                            </select>
+                                        </div>
+                                    )}
+                                    {STRUMMED_INSTRUMENTS.has(instrument) && (
+                                        <div className="panel-row">
+                                            <label>Capo</label>
+                                            <select value={capo} onChange={(e) => setCapo(parseInt(e.target.value))}>
+                                                <option value={0}>No capo</option>
+                                                {[1,2,3,4,5,6,7,8,9,10,11].map(n => (
+                                                    <option key={n} value={n}>Fret {n}</option>
+                                                ))}
                                             </select>
                                         </div>
                                     )}
@@ -992,6 +1072,11 @@ function App() {
                                 <div className="chord-label">
                                     {chord.root} {chord.type}
                                     {chord.numeral && ` (${chord.numeral})`}
+                                    {capo > 0 && STRUMMED_INSTRUMENTS.has(instrument) && (
+                                        <span className="capo-label" title={`Capo ${capo} — sounds like ${soundingRoot(chord.root, capo)} ${chord.type}`}>
+                                            {' '}∩{capo} → {soundingRoot(chord.root, capo)}
+                                        </span>
+                                    )}
                                 </div>
                                 
                                 {mode === 'fretboard' && (
@@ -1099,13 +1184,27 @@ function App() {
                                 </div>
                             </div>
 
+                            {/* Chord box diagram — guitar and ukulele only (chords-db coverage) */}
+                            {(instrument === 'guitar' || instrument === 'ukulele') && (
+                                <ChordDiagram
+                                    instrument={instrument}
+                                    root={chord.root}
+                                    chordType={chord.type}
+                                    capo={capo}
+                                />
+                            )}
+
                             {(() => {
+                                const allPositions = getChordPositions(chord.root, chord.type);
                                 const effectivePositions = chord.isFiltering
                                     ? chord.visiblePositions
                                     : (neckPosition !== null
-                                        ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition)?.positions || null
+                                        ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions)?.positions || null
                                         : null);
-                                const fretStart = viewLayout === 'two-col' && neckPosition > 0 ? computeFretStart(effectivePositions) : 0;
+                                // When capo is active, start the fretboard view just before the capo
+                                const fretStart = capo > 0
+                                    ? Math.max(0, capo - 1)
+                                    : (viewLayout === 'two-col' && neckPosition > 0 ? computeFretStart(effectivePositions) : 0);
                                 return (
                                     <Fretboard
                                         tuning={currentTuning}
@@ -1121,6 +1220,7 @@ function App() {
                                         isFilterMode={chord.isFiltering}
                                         onNoteClick={(s, f) => handleNoteClick(index, s, f)}
                                         instrument={instrument}
+                                        capoFret={capo}
                                     />
                                 );
                             })()}

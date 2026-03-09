@@ -14,7 +14,8 @@ const Fretboard = ({
     visiblePositions,
     isFilterMode,
     onNoteClick,
-    instrument
+    instrument,
+    capoFret = 0,
 }) => {
     const chordNotes = useMemo(() => MusicTheory.getChordNotes(root, chordType), [root, chordType]);
     const scaleNotes = useMemo(() => MusicTheory.getScaleNotes(root, mode), [root, mode]);
@@ -75,6 +76,7 @@ const Fretboard = ({
                                     onClick={() => onNoteClick && onNoteClick(stringIndex, fret)}
                                 >
                                     {isBarreFret && !isPaired && <div className="barre-bar" />}
+                                    {capoFret > 0 && fret === capoFret && !isPaired && <div className="capo-bar" />}
                                     {shouldRenderMarker && (
                                         <div className={`fret-marker
                                             ${isRoot ? 'root' : ''}

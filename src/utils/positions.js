@@ -1,4 +1,5 @@
 import { MusicTheory } from './musicTheory.js';
+import { fretsToPositions, transposeFretsToTuning } from './tuningTransposer.js';
 
 export const INSTRUMENT_MAX_FRETS = {
     guitar: 24,
@@ -75,9 +76,75 @@ function computeOpenPosition(root, chordType, tuning) {
     return positions;
 }
 
+/**
+ * Convert SmartChord Fingering objects to position entries compatible with
+ * getPositionsForChord's return format.
+ *
+ * If the instrument tuning differs from standard, pass fromTuning (standard)
+ * and toTuning (current) to transpose fret positions automatically.
+ *
+ * @param {{ open: Fingering[], barre: Fingering[] }} fingerings  From SmartChord hook
+ * @param {number}   capoFret    0 = no capo; open shapes are shifted by this amount
+ * @param {string[]} [fromTuning]  Standard tuning (source of SmartChord fingerings)
+ * @param {string[]} [toTuning]    Current tuning (target; omit if same as standard)
+ * @param {number}   [maxFret=24]
+ * @returns {Array<{name:string, position:number, positions:Set, source:string}>|null}
+ *          null when no fingerings are available (caller should use algorithmic fallback)
+ */
+export function fingeringsToPositionEntries(fingerings, capoFret = 0, fromTuning, toTuning, maxFret = 24) {
+    if (!fingerings || (fingerings.open.length === 0 && fingerings.barre.length === 0)) {
+        return null;
+    }
+
+    const needsTranspose = fromTuning && toTuning &&
+        fromTuning.some((note, i) => note !== toTuning[i]);
+
+    const adaptFrets = (frets) =>
+        needsTranspose
+            ? transposeFretsToTuning(frets, fromTuning, toTuning, maxFret)
+            : frets;
+
+    const entries = [];
+
+    for (const f of fingerings.open) {
+        const frets = adaptFrets(f.frets);
+        const positions = fretsToPositions(frets, capoFret);
+        if (positions.size === 0) continue;
+        entries.push({
+            name: f.name || 'Open',
+            position: capoFret,
+            positions,
+            source: 'smartchord',
+            shape: 'open',
+            barreStartFret: null,
+        });
+    }
+
+    for (const f of fingerings.barre) {
+        const frets = adaptFrets(f.frets);
+        const positions = fretsToPositions(frets, 0); // barre frets are already absolute
+        if (positions.size === 0) continue;
+        const minPlayedFret = Math.min(...frets.filter(x => x > 0));
+        entries.push({
+            name: f.name || `Barre (${f.barreStartFret ?? minPlayedFret})`,
+            position: f.barreStartFret ?? minPlayedFret,
+            positions,
+            source: 'smartchord',
+            shape: 'barre',
+            barreStartFret: f.barreStartFret ?? minPlayedFret,
+        });
+    }
+
+    if (entries.length === 0) return null;
+    entries.sort((a, b) => a.position - b.position);
+    return entries;
+}
+
 // Returns the position closest to targetFret.
-export function getPositionAtFret(root, chordType, instrument, tuning, targetFret) {
-    const positions = getPositionsForChord(root, chordType, instrument, tuning);
+// Pass precomputedPositions (from fingeringsToPositionEntries or getPositionsForChord)
+// to skip re-computation.
+export function getPositionAtFret(root, chordType, instrument, tuning, targetFret, precomputedPositions = null) {
+    const positions = precomputedPositions || getPositionsForChord(root, chordType, instrument, tuning);
     if (!positions.length) return null;
     return positions.reduce((best, p) =>
         Math.abs(p.position - targetFret) < Math.abs(best.position - targetFret) ? p : best
@@ -160,6 +227,64 @@ export function getPositionsForChord(root, chordType, instrument, tuning) {
                     });
                     if (positions.size > 0) {
                         result.push({ name: `Fret ${anchor}`, position: anchor, positions });
+                    }
+                }
+                anchor += 12;
+            }
+        });
+
+        result.sort((a, b) => a.position - b.position);
+        return result;
+    }
+
+    // Mandolin: compute voicings on the 4 unique courses (skip paired strings — odd indices).
+    // Uses the same windowed chord-tone search as ukulele.
+    if (instrument === 'mandolin') {
+        const chordNotes = MusicTheory.getChordNotes(root, chordType);
+        const result = [];
+
+        // Build a 4-element "effective tuning" from the even-indexed strings (one per course)
+        const courseTuning = tuning.filter((_, i) => i % 2 === 0); // ['E','A','D','G']
+
+        const openPositionsCourses = computeOpenPosition(root, chordType, courseTuning);
+        if (openPositionsCourses.size > 0) {
+            // Map course positions back to paired-string positions (course i → strings 2i and 2i+1)
+            const expanded = new Set();
+            for (const pos of openPositionsCourses) {
+                const [courseIdx, fret] = pos.split('-').map(Number);
+                expanded.add(`${courseIdx * 2}-${fret}`);
+                expanded.add(`${courseIdx * 2 + 1}-${fret}`);
+            }
+            result.push({ name: 'Open', position: 0, positions: expanded });
+        }
+
+        const rootIdx = MusicTheory.getNoteIndex(root);
+        const seenAnchors = new Set([0]);
+        courseTuning.forEach((openNote) => {
+            const openBase = MusicTheory.getNoteIndex(openNote);
+            let anchor = ((rootIdx - openBase) % 12 + 12) % 12;
+            if (anchor === 0) anchor = 12;
+            while (anchor <= maxFrets) {
+                if (!seenAnchors.has(anchor)) {
+                    seenAnchors.add(anchor);
+                    const coursePositions = new Set();
+                    courseTuning.forEach((strOpen, courseIdx) => {
+                        for (let fret = anchor; fret <= anchor + 4; fret++) {
+                            const note = MusicTheory.transposeNote(strOpen, fret);
+                            if (chordNotes.some(n => MusicTheory.areNotesEqual(note, n))) {
+                                if (fret <= maxFrets) coursePositions.add(`${courseIdx}-${fret}`);
+                                break;
+                            }
+                        }
+                    });
+                    if (coursePositions.size > 0) {
+                        const expanded = new Set();
+                        for (const pos of coursePositions) {
+                            const [courseIdx, fret] = pos.split('-').map(Number);
+                            expanded.add(`${courseIdx * 2}-${fret}`);
+                            expanded.add(`${courseIdx * 2 + 1}-${fret}`);
+                        }
+                        result.push({ name: `Fret ${anchor}`, position: anchor, positions: expanded });
                     }
                 }
                 anchor += 12;

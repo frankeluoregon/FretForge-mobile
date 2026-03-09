@@ -33,6 +33,8 @@
   "dependencies": {
     "@capacitor/android": "^7.2.0",
     "@capacitor/core": "^7.2.0",
+    "@techies23/react-chords": "^1.0.7",
+    "@tombatossals/chords-db": "^0.5.1",
     "jspdf": "^4.0.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
