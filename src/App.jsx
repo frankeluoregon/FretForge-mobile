@@ -102,8 +102,9 @@ function App() {
     // Capo — applies to guitar, ukulele, mandolin; 0 = no capo
     const [capo, setCapo] = useState(savedSettings.capo || 0);
 
-    // Solo mode — guitar and ukulele only; uses algorithmic neck patterns instead of chords-db voicings
-    const [soloMode, setSoloMode] = useState(savedSettings.soloMode ?? false);
+    // Solo mode — guitar and ukulele only; uses algorithmic neck patterns instead of chords-db voicings.
+    // Defaults to false (chord mode) regardless of saved setting, to avoid users getting stuck in solo mode.
+    const [soloMode, setSoloMode] = useState(false);
 
 
     // Progression State
@@ -129,7 +130,7 @@ function App() {
     // Persistence Effect
     useEffect(() => {
         const settings = {
-            mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo, soloMode,
+            mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo,
             numFrets, showScaleNotes, showPassingNotes,
             theme, zoom, playbackMode, progKey, progQuality, selectedProgression, neckPosition, viewLayout,
             // Save current chords to the appropriate bucket, preserve the other from existing storage
@@ -150,7 +151,7 @@ function App() {
         }
 
         localStorage.setItem('fretforge_settings', JSON.stringify(settings, replacer));
-    }, [mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo, soloMode,
+    }, [mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo,
         numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode,
         progKey, progQuality, selectedProgression, neckPosition, viewLayout, chords]);
 
@@ -859,14 +860,14 @@ function App() {
                             <span className="utility-label">{viewLayout === 'two-col' ? '2-col' : '1-col'}</span>
                         </button>
 
-                        {/* Solo/Chord mode toggle — guitar and ukulele only */}
+                        {/* Solo mode toggle — guitar and ukulele only; inactive = chord mode (default) */}
                         {(instrument === 'guitar' || instrument === 'ukulele') && (
                             <button
                                 className={`utility-btn utility-toggle ${soloMode ? 'active' : ''}`}
                                 onClick={() => { setSoloMode(s => !s); setNeckPosition(null); }}
-                                title={soloMode ? 'Switch to chord voicing mode' : 'Switch to solo/scale mode (algorithmic)'}
+                                title={soloMode ? 'Solo mode on — click to switch to chord voicing mode' : 'Chord mode — click to switch to solo/scale mode'}
                             >
-                                <span className="utility-label">{soloMode ? 'SOLO' : 'CHORD'}</span>
+                                <span className="utility-label">Solo</span>
                             </button>
                         )}
 
