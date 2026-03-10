@@ -12,6 +12,7 @@ const Fretboard = ({
     showScaleNotes,
     showPassingNotes,
     visiblePositions,
+    mutedStrings,
     isFilterMode,
     onNoteClick,
     instrument,
@@ -38,11 +39,12 @@ const Fretboard = ({
         >
             {tuning.map((openNote, stringIndex) => {
                 const isPaired = isMandolinPaired(stringIndex);
-                
+                const isMuted = mutedStrings?.has(stringIndex) ?? false;
+
                 return (
                     <React.Fragment key={stringIndex}>
                         {/* String Label */}
-                        <div className={`string-label ${isPaired ? 'mandolin-paired-string' : ''}`}>
+                        <div className={`string-label ${isPaired ? 'mandolin-paired-string' : ''} ${isMuted ? 'muted-string' : ''}`}>
                             {openNote}
                         </div>
 
@@ -72,9 +74,10 @@ const Fretboard = ({
                             return (
                                 <div
                                     key={fret}
-                                    className={`fret-cell fret-${fretIdx} ${isPaired ? 'mandolin-paired-string' : ''}`}
+                                    className={`fret-cell fret-${fretIdx} ${isPaired ? 'mandolin-paired-string' : ''} ${isMuted ? 'muted-string' : ''}`}
                                     onClick={() => onNoteClick && onNoteClick(stringIndex, fret)}
                                 >
+                                    {isMuted && fret === 0 && <div className="fret-marker muted-x">✕</div>}
                                     {isBarreFret && !isPaired && <div className="barre-bar" />}
                                     {capoFret > 0 && fret === capoFret && !isPaired && <div className="capo-bar" />}
                                     {shouldRenderMarker && (

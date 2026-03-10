@@ -106,6 +106,8 @@ export function fingeringsToPositionEntries(fingerings, capoFret = 0, fromTuning
 
     const entries = [];
 
+    const getMuted = (frets) => new Set(frets.flatMap((fr, i) => fr < 0 ? [i] : []));
+
     for (const f of fingerings.open) {
         const frets = adaptFrets(f.frets);
         const positions = fretsToPositions(frets, capoFret);
@@ -114,6 +116,7 @@ export function fingeringsToPositionEntries(fingerings, capoFret = 0, fromTuning
             name: f.name || 'Open',
             position: capoFret,
             positions,
+            mutedStrings: getMuted(frets),
             source: 'smartchord',
             shape: 'open',
             barreStartFret: null,
@@ -129,6 +132,7 @@ export function fingeringsToPositionEntries(fingerings, capoFret = 0, fromTuning
             name: f.name || `Barre (${f.barreStartFret ?? minPlayedFret})`,
             position: f.barreStartFret ?? minPlayedFret,
             positions,
+            mutedStrings: getMuted(frets),
             source: 'smartchord',
             shape: 'barre',
             barreStartFret: f.barreStartFret ?? minPlayedFret,

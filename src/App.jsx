@@ -1242,13 +1242,18 @@ function App() {
 
                             {(() => {
                                 const allPositions = getChordPositions(chord.root, chord.type);
+                                const isVoicingMode = STRUMMED_INSTRUMENTS.has(instrument) && !soloMode && neckPosition !== null && !chord.isFiltering;
+                                const selectedVoicing = isVoicingMode
+                                    ? allPositions[Math.min(neckPosition, allPositions.length - 1)]
+                                    : null;
                                 const effectivePositions = chord.isFiltering
                                     ? chord.visiblePositions
                                     : (neckPosition !== null
-                                        ? ((STRUMMED_INSTRUMENTS.has(instrument) && !soloMode)
-                                            ? allPositions[Math.min(neckPosition, allPositions.length - 1)]?.positions || null
-                                            : getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions)?.positions || null)
+                                        ? (selectedVoicing?.positions
+                                            || getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions)?.positions
+                                            || null)
                                         : null);
+                                const mutedStrings = selectedVoicing?.mutedStrings ?? null;
                                 // When capo is active, start the fretboard view just before the capo
                                 const fretStart = capo > 0
                                     ? Math.max(0, capo - 1)
@@ -1265,6 +1270,7 @@ function App() {
                                         showScaleNotes={showScaleNotes}
                                         showPassingNotes={showPassingNotes}
                                         visiblePositions={effectivePositions}
+                                        mutedStrings={mutedStrings}
                                         isFilterMode={chord.isFiltering}
                                         onNoteClick={(s, f) => handleNoteClick(index, s, f)}
                                         instrument={instrument}

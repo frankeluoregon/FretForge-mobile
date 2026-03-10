@@ -2609,6 +2609,26 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
     border-right: 3px solid var(--fret-wire);
 }
 
+/* Muted strings in chord voicing mode */
+.string-label.muted-string {
+    opacity: 0.3;
+}
+
+.fret-cell.muted-string::before {
+    opacity: 0.2;
+}
+
+.fret-marker.muted-x {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--text-secondary, #888);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 .barre-bar {
     position: absolute;
     left: 50%;
