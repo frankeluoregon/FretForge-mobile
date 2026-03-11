@@ -203,16 +203,19 @@ function App() {
         return Math.max(0, Math.min(...frets) - 1);
     };
 
-    // Auto-adjust numFrets across all chords when position changes
+    // Auto-adjust numFrets to fit the current voicing/position across all chords
     useEffect(() => {
-        if (neckPosition === null) return;
+        const isChordMode = STRUMMED_INSTRUMENTS.has(instrument) && !soloMode;
+        // Solo mode: only run when position is locked; chord mode: always run (voicing 0 shown by default)
+        if (!isChordMode && neckPosition === null) return;
+        const voicingIndex = neckPosition ?? 0;
         let maxNeeded = 0;
         chords.forEach(chord => {
             const allPositions = getChordPositions(chord.root, chord.type);
-            const p = (STRUMMED_INSTRUMENTS.has(instrument) && !soloMode)
-                ? allPositions[Math.min(neckPosition, allPositions.length - 1)]
+            const p = isChordMode
+                ? allPositions[Math.min(voicingIndex, allPositions.length - 1)]
                 : getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions);
-            if (p) {
+            if (p?.positions?.size) {
                 const m = Math.max(...Array.from(p.positions).map(s => parseInt(s.split('-')[1])));
                 if (m > maxNeeded) maxNeeded = m;
             }
@@ -222,7 +225,7 @@ function App() {
             const cap = INSTRUMENT_MAX_FRETS[instrument] || 24;
             return needed > prev ? Math.min(needed, cap) : prev;
         });
-    }, [neckPosition, chords, instrument, getChordPositions]);
+    }, [neckPosition, chords, instrument, soloMode, getChordPositions]);
 
     // Effects
     useEffect(() => {
@@ -871,30 +874,30 @@ function App() {
                             </button>
                         )}
 
-                        {/* Voicing/position toggle + slider — strummed instruments only */}
+                        {/* Position controls — strummed instruments only */}
                         {STRUMMED_INSTRUMENTS.has(instrument) && (
                             <>
-                                {/* Text toggle: full neck vs voicing/position mode (single-col only) */}
-                                {viewLayout !== 'two-col' && (
+                                {/* Full neck / position toggle — solo mode only */}
+                                {soloMode && viewLayout !== 'two-col' && (
                                     <button
                                         className={`neck-mode-toggle ${neckPosition !== null ? 'active' : ''}`}
                                         onClick={() => setNeckPosition(neckPosition !== null ? null : 0)}
-                                        title={neckPosition !== null ? 'Back to full fretboard' : soloMode ? 'Lock to a neck position' : 'Step through chord voicings'}
+                                        title={neckPosition !== null ? 'Back to full fretboard' : 'Lock to a neck position'}
                                     >
-                                        {neckPosition !== null ? (soloMode ? 'POSITION' : 'VOICING') : 'FULL NECK'}
+                                        {neckPosition !== null ? 'POSITION' : 'FULL NECK'}
                                     </button>
                                 )}
-                                {/* Slider: voicing index in chord mode, fret number in solo mode */}
-                                {(neckPosition !== null || viewLayout === 'two-col') && (
+                                {/* Chord mode: slider always visible; solo mode: only when position locked or two-col */}
+                                {(!soloMode || neckPosition !== null || viewLayout === 'two-col') && (
                                     <input
                                         type="range"
-                                        className={`position-slider${neckPosition === null ? ' inactive' : ''}`}
+                                        className={`position-slider${soloMode && neckPosition === null ? ' inactive' : ''}`}
                                         min={0}
                                         max={soloMode ? INSTRUMENT_MAX_FRETS[instrument] : maxVoicingCount - 1}
                                         value={neckPosition ?? 0}
                                         onChange={e => setNeckPosition(parseInt(e.target.value))}
-                                        onMouseDown={() => { if (neckPosition === null) setNeckPosition(0); }}
-                                        onTouchStart={() => { if (neckPosition === null) setNeckPosition(0); }}
+                                        onMouseDown={() => { if (soloMode && neckPosition === null) setNeckPosition(0); }}
+                                        onTouchStart={() => { if (soloMode && neckPosition === null) setNeckPosition(0); }}
                                     />
                                 )}
                             </>
@@ -1243,17 +1246,18 @@ function App() {
 
                             {(() => {
                                 const allPositions = getChordPositions(chord.root, chord.type);
-                                const isVoicingMode = STRUMMED_INSTRUMENTS.has(instrument) && !soloMode && neckPosition !== null && !chord.isFiltering;
-                                const selectedVoicing = isVoicingMode
-                                    ? allPositions[Math.min(neckPosition, allPositions.length - 1)]
+                                const isChordVoicingMode = STRUMMED_INSTRUMENTS.has(instrument) && !soloMode && !chord.isFiltering;
+                                const voicingIndex = neckPosition ?? 0;
+                                const selectedVoicing = isChordVoicingMode && allPositions.length > 0
+                                    ? allPositions[Math.min(voicingIndex, allPositions.length - 1)]
                                     : null;
                                 const effectivePositions = chord.isFiltering
                                     ? chord.visiblePositions
-                                    : (neckPosition !== null
-                                        ? (selectedVoicing?.positions
-                                            || getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions)?.positions
-                                            || null)
-                                        : null);
+                                    : (isChordVoicingMode
+                                        ? (selectedVoicing?.positions ?? null)
+                                        : (neckPosition !== null
+                                            ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions)?.positions || null
+                                            : null));
                                 const mutedStrings = selectedVoicing?.mutedStrings ?? null;
                                 // When capo is active, start the fretboard view just before the capo
                                 const fretStart = capo > 0
