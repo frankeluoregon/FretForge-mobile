@@ -17,17 +17,30 @@ const Fretboard = ({
     onNoteClick,
     instrument,
     capoFret = 0,
+    isOpenChord = false,
 }) => {
     const chordNotes = useMemo(() => MusicTheory.getChordNotes(root, chordType), [root, chordType]);
     const scaleNotes = useMemo(() => MusicTheory.getScaleNotes(root, mode), [root, mode]);
 
-    // Barre fret: the lowest non-zero fret in the visible positions set (null when open/no position)
+    // Barre fret: lowest non-zero fret shared by 2+ strings (null for open chords or single-finger positions)
     const barFret = useMemo(() => {
+        if (isOpenChord) return null;
         if (!visiblePositions || visiblePositions.size === 0) return null;
         const frets = Array.from(visiblePositions).map(k => parseInt(k.split('-')[1])).filter(f => f > 0);
         if (frets.length === 0) return null;
-        return Math.min(...frets);
-    }, [visiblePositions]);
+        const minFret = Math.min(...frets);
+        if (frets.filter(f => f === minFret).length < 2) return null;
+        return minFret;
+    }, [visiblePositions, isOpenChord]);
+
+    // First string index that has a position at the barre fret (used to show BARRE label once)
+    const firstBarreStringIndex = useMemo(() => {
+        if (barFret === null || !visiblePositions) return null;
+        for (let si = 0; si < tuning.length; si++) {
+            if (visiblePositions.has(`${si}-${barFret}`)) return si;
+        }
+        return null;
+    }, [barFret, visiblePositions, tuning]);
 
     // Helper to check if string is a mandolin paired string (odd indices)
     const isMandolinPaired = (index) => instrument === 'mandolin' && index % 2 === 1;
@@ -70,6 +83,7 @@ const Fretboard = ({
                             const shouldRenderMarker = (isFilterMode || isSelected) && isValidNote && !isPaired;
 
                             const isBarreFret = barFret !== null && fret === barFret;
+                            const isBarreCell = isBarreFret && visiblePositions?.has(posKey);
 
                             return (
                                 <div
@@ -78,7 +92,11 @@ const Fretboard = ({
                                     onClick={() => onNoteClick && onNoteClick(stringIndex, fret)}
                                 >
                                     {isMuted && fret === 0 && <div className="fret-marker muted-x">✕</div>}
-                                    {isBarreFret && !isPaired && <div className="barre-bar" />}
+                                    {isBarreCell && !isPaired && (
+                                        <div className="barre-bar">
+                                            {stringIndex === firstBarreStringIndex && <span className="barre-label">BARRE</span>}
+                                        </div>
+                                    )}
                                     {capoFret > 0 && fret === capoFret && !isPaired && <div className="capo-bar" />}
                                     {shouldRenderMarker && (
                                         <div className={`fret-marker

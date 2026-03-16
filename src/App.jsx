@@ -1259,6 +1259,7 @@ function App() {
                                             ? getPositionAtFret(chord.root, chord.type, instrument, currentTuning, neckPosition, allPositions)?.positions || null
                                             : null));
                                 const mutedStrings = selectedVoicing?.mutedStrings ?? null;
+                                const isOpenChord = selectedVoicing?.shape === 'open';
                                 // When capo is active, start the fretboard view just before the capo
                                 const fretStart = capo > 0
                                     ? Math.max(0, capo - 1)
@@ -1280,6 +1281,7 @@ function App() {
                                         onNoteClick={(s, f) => handleNoteClick(index, s, f)}
                                         instrument={instrument}
                                         capoFret={capo}
+                                        isOpenChord={isOpenChord}
                                     />
                                 );
                             })()}
