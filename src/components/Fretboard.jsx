@@ -116,7 +116,6 @@ const Fretboard = ({
                                             ${isFilterMode && !isSelected ? 'dimmed' : ''}
                                             ${isFilterMode && isSelected ? 'selected' : ''}
                                             ${onNoteClick ? 'interactive' : ''}
-                                            ${isBarreCell ? 'barre-covered' : ''}
                                         `}>
                                             {isRoot && (
                                                 <>

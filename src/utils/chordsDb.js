@@ -106,11 +106,14 @@ function dbPositionToFingering(pos, idx) {
     // barres[] holds relative fret values; convert first barre to absolute
     const barreStartFret = hasBarre ? (pos.baseFret + pos.barres[0] - 1) : null;
     const playedFrets = absoluteFrets.filter(f => f > 0);
+    // A fingering is only "open" if it genuinely uses open strings — chords like Bb that sit
+    // at baseFret=1 with no open strings are treated as barre so they sort by actual fret.
+    const hasOpenString = absoluteFrets.some(f => f === 0);
 
     return {
         id:              String(idx),
         name:            hasBarre ? `Barre (${barreStartFret})` : 'Open',
-        shape:           (pos.baseFret === 1 && !hasBarre) ? 'open' : 'barre',
+        shape:           (pos.baseFret === 1 && !hasBarre && hasOpenString) ? 'open' : 'barre',
         frets:           absoluteFrets,
         fingers:         revFingers,
         barreStartFret,
