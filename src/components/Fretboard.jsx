@@ -33,10 +33,18 @@ const Fretboard = ({
         return minFret;
     }, [visiblePositions, isOpenChord]);
 
-    // First string index that has a position at the barre fret (used to show BARRE label once)
+    // First and last string indices that have a position at the barre fret
     const firstBarreStringIndex = useMemo(() => {
         if (barFret === null || !visiblePositions) return null;
         for (let si = 0; si < tuning.length; si++) {
+            if (visiblePositions.has(`${si}-${barFret}`)) return si;
+        }
+        return null;
+    }, [barFret, visiblePositions, tuning]);
+
+    const lastBarreStringIndex = useMemo(() => {
+        if (barFret === null || !visiblePositions) return null;
+        for (let si = tuning.length - 1; si >= 0; si--) {
             if (visiblePositions.has(`${si}-${barFret}`)) return si;
         }
         return null;
@@ -93,7 +101,7 @@ const Fretboard = ({
                                 >
                                     {isMuted && fret === 0 && <div className="fret-marker muted-x">✕</div>}
                                     {isBarreCell && !isPaired && (
-                                        <div className="barre-bar">
+                                        <div className={`barre-bar${stringIndex === firstBarreStringIndex ? ' barre-top' : ''}${stringIndex === lastBarreStringIndex ? ' barre-bottom' : ''}`}>
                                             {stringIndex === firstBarreStringIndex && <span className="barre-label">BARRE</span>}
                                         </div>
                                     )}
@@ -108,6 +116,7 @@ const Fretboard = ({
                                             ${isFilterMode && !isSelected ? 'dimmed' : ''}
                                             ${isFilterMode && isSelected ? 'selected' : ''}
                                             ${onNoteClick ? 'interactive' : ''}
+                                            ${isBarreCell ? 'barre-covered' : ''}
                                         `}>
                                             {isRoot && (
                                                 <>

@@ -2633,17 +2633,36 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    width: 22px;
-    top: 0;
-    bottom: 0;
+    width: 18px;
+    top: -1px;
+    bottom: -1px;
     background: var(--text-accent);
     opacity: 0.7;
-    border-radius: 11px;
+    border-radius: 0;
     z-index: 0;
     pointer-events: none;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.barre-bar.barre-top {
+    top: 0;
+    border-radius: 9px 9px 0 0;
+}
+
+.barre-bar.barre-bottom {
+    bottom: 0;
+    border-radius: 0 0 9px 9px;
+}
+
+.barre-bar.barre-top.barre-bottom {
+    border-radius: 9px;
+}
+
+.fret-marker.barre-covered {
+    opacity: 0.45;
+    z-index: 1;
 }
 
 .barre-label {
