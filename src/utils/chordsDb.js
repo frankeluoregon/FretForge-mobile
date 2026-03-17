@@ -106,14 +106,23 @@ function dbPositionToFingering(pos, idx) {
     // barres[] holds relative fret values; convert first barre to absolute
     const barreStartFret = hasBarre ? (pos.baseFret + pos.barres[0] - 1) : null;
     const playedFrets = absoluteFrets.filter(f => f > 0);
-    // A fingering is only "open" if it genuinely uses open strings — chords like Bb that sit
-    // at baseFret=1 with no open strings are treated as barre so they sort by actual fret.
+    // A fingering is only "open" if it genuinely uses open strings AND is practical to finger.
+    // Chords like Bb (baseFret=1, no open strings) and Cm open (fret 3 on both outer strings
+    // with only one open string between) are treated as barre so they sort by actual fret.
     const hasOpenString = absoluteFrets.some(f => f === 0);
+    const openStringCount = absoluteFrets.filter(f => f === 0).length;
+    const highFretCount = absoluteFrets.filter(f => f >= 3).length;
+    const practicalOpen = hasOpenString && !(highFretCount >= 2 && openStringCount <= 1);
+    const isOpen = pos.baseFret === 1 && !hasBarre && practicalOpen;
+    // Nut-position voicings that aren't practical open AND have no barre indicator
+    // are impractical — exclude them so the first real barre shows instead.
+    const impracticalOpen = pos.baseFret === 1 && !hasBarre && !practicalOpen;
 
     return {
         id:              String(idx),
         name:            hasBarre ? `Barre (${barreStartFret})` : 'Open',
-        shape:           (pos.baseFret === 1 && !hasBarre && hasOpenString) ? 'open' : 'barre',
+        shape:           isOpen ? 'open' : 'barre',
+        impracticalOpen,
         frets:           absoluteFrets,
         fingers:         revFingers,
         barreStartFret,
@@ -133,7 +142,8 @@ export function getChordFingerings(instrument, root, chordType) {
     const rawPositions = getRawDbPositions(instrument, root, chordType);
     if (!rawPositions) return { open: [], barre: [] };
 
-    const all = rawPositions.map((pos, i) => dbPositionToFingering(pos, i));
+    const all = rawPositions.map((pos, i) => dbPositionToFingering(pos, i))
+        .filter(f => !f.impracticalOpen);
     return {
         open:  all.filter(f => f.shape === 'open'),
         barre: all.filter(f => f.shape === 'barre'),

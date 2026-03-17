@@ -2640,16 +2640,13 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
     left: 50%;
     transform: translateX(-50%);
     width: 18px;
-    top: -1px;
-    bottom: -1px;
+    top: 0;
+    bottom: 0;
     background: var(--text-accent);
     opacity: 0.75;
     border-radius: 0;
     z-index: 0;
     pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .barre-bar.barre-top {
@@ -2664,25 +2661,6 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
 
 .barre-bar.barre-top.barre-bottom {
     border-radius: 9px;
-}
-
-.fret-marker.barre-covered {
-    opacity: 1;
-    z-index: 1;
-}
-
-.barre-label {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-90deg);
-    font-size: 7px;
-    font-weight: 900;
-    color: var(--bg-primary, #fff);
-    white-space: nowrap;
-    pointer-events: none;
-    letter-spacing: 1.5px;
-    opacity: 1;
 }
 
 /* Capo bar — full-width vertical bar distinguishing it from barre */

@@ -92,16 +92,14 @@ const Fretboard = ({
                             return (
                                 <div
                                     key={fret}
-                                    className={`fret-cell fret-${fretIdx} ${isPaired ? 'mandolin-paired-string' : ''} ${isMuted ? 'muted-string' : ''}`}
+                                    className={`fret-cell fret-${fretIdx} ${isPaired ? 'mandolin-paired-string' : ''} ${isMuted ? 'muted-string' : ''} ${isBarreFret ? 'barre-fret' : ''}`}
                                     onClick={() => onNoteClick && onNoteClick(stringIndex, fret)}
                                 >
                                     {isMuted && (barFret !== null ? isBarreFret : fret === 0) && !isPaired && (
                                         <div className="fret-marker muted-x" style={{ zIndex: 2 }}>✕</div>
                                     )}
                                     {isBarreFret && !isPaired && (
-                                        <div className={`barre-bar${stringIndex === firstBarreStringIndex ? ' barre-top' : ''}${stringIndex === lastBarreStringIndex ? ' barre-bottom' : ''}`}>
-                                            {stringIndex === firstBarreStringIndex && <span className="barre-label">BARRE</span>}
-                                        </div>
+                                        <div className={`barre-bar${stringIndex === firstBarreStringIndex ? ' barre-top' : ''}${stringIndex === lastBarreStringIndex ? ' barre-bottom' : ''}`} />
                                     )}
                                     {capoFret > 0 && fret === capoFret && !isPaired && <div className="capo-bar" />}
                                     {shouldRenderMarker && (
