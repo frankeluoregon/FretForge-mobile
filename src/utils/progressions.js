@@ -62,24 +62,41 @@ export const Progressions = {
 
     getProgressions(quality = null) {
         const all = [
+            // ── Major ────────────────────────────────────────────────
             { name: 'I - IV - V', value: 'I-IV-V', use7ths: false, quality: 'major' },
+            { name: 'I - IV - V - I', value: 'I-IV-V-I', use7ths: false, quality: 'major' },
+            { name: 'I - V - IV', value: 'I-V-IV', use7ths: false, quality: 'major' },
+            { name: 'I - IV - V - IV', value: 'I-IV-V-IV', use7ths: false, quality: 'major' },
             { name: 'I - V - vi - IV', value: 'I-V-vi-IV', use7ths: false, quality: 'major' },
             { name: 'I - IV - vi - V', value: 'I-IV-vi-V', use7ths: false, quality: 'major' },
             { name: 'I - vi - IV - V', value: 'I-vi-IV-V', use7ths: false, quality: 'major' },
             { name: 'vi - IV - I - V', value: 'vi-IV-I-V', use7ths: false, quality: 'major' },
             { name: 'I - iii - IV - V', value: 'I-iii-IV-V', use7ths: false, quality: 'major' },
+            { name: 'I - iii - vi - IV', value: 'I-iii-vi-IV', use7ths: false, quality: 'major' },
             { name: 'I - IV - I - V', value: 'I-IV-I-V', use7ths: false, quality: 'major' },
             { name: 'I - V - IV - V', value: 'I-V-IV-V', use7ths: false, quality: 'major' },
+            { name: 'I - VII - IV', value: 'I-VII-IV', use7ths: false, quality: 'major' },
+            { name: 'I - III - IV - iv', value: 'I-III-IV-iv', use7ths: false, quality: 'major' },
+            { name: 'I - ii - IV - V', value: 'I-ii-IV-V', use7ths: false, quality: 'major' },
+            { name: 'IV - V - I', value: 'IV-V-I', use7ths: false, quality: 'major' },
+            { name: 'I - V - vi - iii - IV - I - IV - V', value: 'I-V-vi-iii-IV-I-IV-V', use7ths: false, quality: 'major' },
+            // Jazz / 7ths
             { name: 'I - vi - ii - V', value: 'I-vi-ii-V', use7ths: true, quality: 'major' },
             { name: 'ii - V - I', value: 'ii-V-I', use7ths: true, quality: 'major' },
             { name: 'iii - vi - ii - V', value: 'iii-vi-ii-V', use7ths: true, quality: 'major' },
-            { name: 'I - III - IV - iv', value: 'I-III-IV-iv', use7ths: false, quality: 'major' },
-            { name: 'i - VI - III - VII', value: 'i-VI-III-VII', use7ths: false, quality: 'minor' },
+            { name: 'I - vi - ii - V - I', value: 'I-vi-ii-V-I', use7ths: true, quality: 'major' },
+            // Blues
+            { name: '12-Bar Blues', value: 'I-I-I-I-IV-IV-I-I-V-IV-I-V', use7ths: false, quality: 'major' },
+            // ── Minor ────────────────────────────────────────────────
             { name: 'i - iv - V', value: 'i-iv-V', use7ths: false, quality: 'minor' },
+            { name: 'i - VI - III - VII', value: 'i-VI-III-VII', use7ths: false, quality: 'minor' },
+            { name: 'i - VII - VI - V', value: 'i-VII-VI-V', use7ths: false, quality: 'minor' },
             { name: 'i - VII - VI - VII', value: 'i-VII-VI-VII', use7ths: false, quality: 'minor' },
             { name: 'i - iv - VII - III', value: 'i-iv-VII-III', use7ths: false, quality: 'minor' },
             { name: 'i - VI - VII', value: 'i-VI-VII', use7ths: false, quality: 'minor' },
-            { name: 'i - III - VII - iv', value: 'i-III-VII-iv', use7ths: false, quality: 'minor' }
+            { name: 'i - III - VII - iv', value: 'i-III-VII-iv', use7ths: false, quality: 'minor' },
+            { name: 'i - iv - v - i', value: 'i-iv-v-i', use7ths: false, quality: 'minor' },
+            { name: 'i - V - i - iv', value: 'i-V-i-iv', use7ths: false, quality: 'minor' },
         ];
         return quality ? all.filter(p => p.quality === quality) : all;
     }

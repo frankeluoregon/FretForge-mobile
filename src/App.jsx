@@ -79,11 +79,10 @@ function App() {
     const [instrument, setInstrument] = useState(savedSettings.instrument || 'guitar');
     const [guitarTuning, setGuitarTuning] = useState(savedSettings.guitarTuning || 'standard');
     const [numFrets, setNumFrets] = useState(() => {
-        if (window.innerWidth <= 768) {
-            return window.innerWidth > window.innerHeight ? 12 : 5;
-        }
+        if (window.innerWidth <= 768) return 5;
         return savedSettings.numFrets || 12;
     });
+    const [navCollapsed, setNavCollapsed] = useState(false);
     const [showScaleNotes, setShowScaleNotes] = useState(savedSettings.showScaleNotes ?? true);
     const [showPassingNotes, setShowPassingNotes] = useState(savedSettings.showPassingNotes ?? true);
     const [theme, setTheme] = useState(savedSettings.theme || 'default');
@@ -205,6 +204,8 @@ function App() {
 
     // Auto-adjust numFrets to fit the current voicing/position across all chords
     useEffect(() => {
+        // On mobile, fret count is fixed — skip auto-expand
+        if (window.innerWidth <= 768) return;
         const isChordMode = STRUMMED_INSTRUMENTS.has(instrument) && !soloMode;
         // Solo mode: only run when position is locked; chord mode: always run (voicing 0 shown by default)
         if (!isChordMode && neckPosition === null) return;
@@ -236,9 +237,7 @@ function App() {
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth <= 768) {
-                // Mobile: fret count based on orientation
-                const isLandscape = window.innerWidth > window.innerHeight;
-                setNumFrets(isLandscape ? 12 : 5);
+                setNumFrets(5);
             } else {
                 // Desktop: compute frets to fill the available width
                 // page-content is 96% of viewport; fretboard-container has 40px padding; 60px label column
@@ -248,34 +247,36 @@ function App() {
             }
         };
 
-        // Auto-hide toolbar on scroll (Mobile only)
-        let lastScrollTop = 0;
+        // Swipe to collapse/expand toolbar (Mobile only)
+        let touchStartY = 0;
         const topBar = document.querySelector('.top-bar');
-        
-        const handleScroll = () => {
-            if (window.innerWidth > 768) return;
-            
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            // Hide on scroll down, show on scroll up
-            if (scrollTop > lastScrollTop && scrollTop > 50) {
-                topBar?.classList.add('hidden');
-            } else {
-                topBar?.classList.remove('hidden');
-            }
-            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+
+        const handleTouchStart = (e) => {
+            touchStartY = e.touches[0].clientY;
         };
+        const handleTouchEnd = (e) => {
+            if (window.innerWidth > 768) return;
+            const deltaY = e.changedTouches[0].clientY - touchStartY;
+            // Swipe up on the top-bar → collapse
+            if (deltaY < -40) setNavCollapsed(true);
+            // Swipe down on the top-bar → expand
+            if (deltaY > 40) setNavCollapsed(false);
+        };
+
+        topBar?.addEventListener('touchstart', handleTouchStart, { passive: true });
+        topBar?.addEventListener('touchend', handleTouchEnd, { passive: true });
 
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', handleResize);
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        
+
         // Initial check
         handleResize();
 
         return () => {
+            topBar?.removeEventListener('touchstart', handleTouchStart);
+            topBar?.removeEventListener('touchend', handleTouchEnd);
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('orientationchange', handleResize);
-            window.removeEventListener('scroll', handleScroll);
         };
     }, []);
 
@@ -728,7 +729,10 @@ function App() {
     return (
         <div className="app-container">
             {/* Top Bar */}
-            <div className="top-bar">
+            <div className={`top-bar${navCollapsed ? ' collapsed' : ''}`}>
+                <div className="top-bar-pull-tab" onClick={() => setNavCollapsed(c => !c)}>
+                    <span className="pull-tab-handle" />
+                </div>
                 <div className="top-bar-content">
                     {/* Header Row */}
                     <div className="top-bar-row">
@@ -1260,10 +1264,13 @@ function App() {
                                             : null));
                                 const mutedStrings = selectedVoicing?.mutedStrings ?? null;
                                 const isOpenChord = selectedVoicing?.shape === 'open';
-                                // When capo is active, start the fretboard view just before the capo
+                                // On mobile or two-col, shift the 5-fret window to show the voicing
+                                const isMobileView = window.innerWidth <= 768;
                                 const fretStart = capo > 0
                                     ? Math.max(0, capo - 1)
-                                    : (viewLayout === 'two-col' && neckPosition > 0 ? computeFretStart(effectivePositions) : 0);
+                                    : ((isMobileView || viewLayout === 'two-col') && neckPosition > 0
+                                        ? computeFretStart(effectivePositions)
+                                        : (isMobileView && effectivePositions ? computeFretStart(effectivePositions) : 0));
                                 return (
                                     <Fretboard
                                         tuning={currentTuning}

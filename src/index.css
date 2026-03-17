@@ -971,6 +971,12 @@ body {
     border-bottom: 2px solid var(--border-dim);
     z-index: 1000;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+/* Pull-tab — hidden on desktop, visible on mobile only via media query below */
+.top-bar-pull-tab {
+    display: none;
 }
 
 .top-bar-content {
@@ -3493,6 +3499,45 @@ input[type="checkbox"] {
     /* Top bar with safe area padding - 28px to sit just below OS menu */
     .top-bar {
         padding-top: calc(env(safe-area-inset-top, 20px) + 28px);
+    }
+
+    /* Collapsed state — slides fully off-screen, pull tab remains visible */
+    .top-bar.collapsed {
+        transform: translateY(calc(-100% + 28px));
+    }
+
+    .top-bar.collapsed .top-bar-content {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* Pull tab at bottom of top-bar — always rendered, visible as small handle */
+    .top-bar-pull-tab {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 28px;
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+    }
+
+    .pull-tab-handle {
+        width: 40px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--text-secondary, #888);
+        opacity: 0.5;
+    }
+
+    .top-bar.collapsed .pull-tab-handle {
+        opacity: 0.8;
+    }
+
+    /* Reduce body padding when nav is collapsed (only pull tab visible) */
+    body:has(.top-bar.collapsed) {
+        padding-top: calc(env(safe-area-inset-top, 20px) + 36px);
+        transition: padding-top 0.3s ease;
     }
 
     /* Top bar container */
