@@ -33,22 +33,19 @@ const Fretboard = ({
         return minFret;
     }, [visiblePositions, isOpenChord]);
 
-    // First and last string indices that have a position at the barre fret
+    // First and last non-paired string indices — bar spans the full column
     const firstBarreStringIndex = useMemo(() => {
-        if (barFret === null || !visiblePositions) return null;
-        for (let si = 0; si < tuning.length; si++) {
-            if (visiblePositions.has(`${si}-${barFret}`)) return si;
-        }
-        return null;
-    }, [barFret, visiblePositions, tuning]);
+        if (barFret === null) return null;
+        return tuning.findIndex((_, i) => !(instrument === 'mandolin' && i % 2 === 1));
+    }, [barFret, tuning, instrument]);
 
     const lastBarreStringIndex = useMemo(() => {
-        if (barFret === null || !visiblePositions) return null;
-        for (let si = tuning.length - 1; si >= 0; si--) {
-            if (visiblePositions.has(`${si}-${barFret}`)) return si;
+        if (barFret === null) return null;
+        for (let i = tuning.length - 1; i >= 0; i--) {
+            if (!(instrument === 'mandolin' && i % 2 === 1)) return i;
         }
         return null;
-    }, [barFret, visiblePositions, tuning]);
+    }, [barFret, tuning, instrument]);
 
     // Helper to check if string is a mandolin paired string (odd indices)
     const isMandolinPaired = (index) => instrument === 'mandolin' && index % 2 === 1;
@@ -91,7 +88,6 @@ const Fretboard = ({
                             const shouldRenderMarker = (isFilterMode || isSelected) && isValidNote && !isPaired;
 
                             const isBarreFret = barFret !== null && fret === barFret;
-                            const isBarreCell = isBarreFret && visiblePositions?.has(posKey);
 
                             return (
                                 <div
@@ -99,8 +95,10 @@ const Fretboard = ({
                                     className={`fret-cell fret-${fretIdx} ${isPaired ? 'mandolin-paired-string' : ''} ${isMuted ? 'muted-string' : ''}`}
                                     onClick={() => onNoteClick && onNoteClick(stringIndex, fret)}
                                 >
-                                    {isMuted && fret === 0 && <div className="fret-marker muted-x">✕</div>}
-                                    {isBarreCell && !isPaired && (
+                                    {isMuted && (barFret !== null ? isBarreFret : fret === 0) && !isPaired && (
+                                        <div className="fret-marker muted-x" style={{ zIndex: 2 }}>✕</div>
+                                    )}
+                                    {isBarreFret && !isPaired && (
                                         <div className={`barre-bar${stringIndex === firstBarreStringIndex ? ' barre-top' : ''}${stringIndex === lastBarreStringIndex ? ' barre-bottom' : ''}`}>
                                             {stringIndex === firstBarreStringIndex && <span className="barre-label">BARRE</span>}
                                         </div>
