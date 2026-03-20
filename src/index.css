@@ -2641,7 +2641,7 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
     transform: translateX(-50%);
     width: 18px;
     top: 0;
-    bottom: 0;
+    bottom: -1px;
     background: var(--text-accent);
     opacity: 0.75;
     border-radius: 0;
@@ -2650,7 +2650,6 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
 }
 
 .barre-bar.barre-top {
-    top: 0;
     border-radius: 9px 9px 0 0;
 }
 

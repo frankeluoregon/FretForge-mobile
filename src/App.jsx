@@ -247,24 +247,31 @@ function App() {
             }
         };
 
-        // Swipe to collapse/expand toolbar (Mobile only)
-        let touchStartY = 0;
-        const topBar = document.querySelector('.top-bar');
+        // Auto-hide top bar on scroll down, reveal on scroll up (Mobile only)
+        let lastScrollY = window.scrollY;
+        let ticking = false;
 
-        const handleTouchStart = (e) => {
-            touchStartY = e.touches[0].clientY;
-        };
-        const handleTouchEnd = (e) => {
+        const handleScroll = () => {
             if (window.innerWidth > 768) return;
-            const deltaY = e.changedTouches[0].clientY - touchStartY;
-            // Swipe up on the top-bar → collapse
-            if (deltaY < -40) setNavCollapsed(true);
-            // Swipe down on the top-bar → expand
-            if (deltaY > 40) setNavCollapsed(false);
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(() => {
+                const currentScrollY = window.scrollY;
+                const delta = currentScrollY - lastScrollY;
+                // Scroll down by 10+px → hide
+                if (delta > 10 && currentScrollY > 60) {
+                    setNavCollapsed(true);
+                }
+                // Scroll up by 10+px → show
+                if (delta < -10) {
+                    setNavCollapsed(false);
+                }
+                lastScrollY = currentScrollY;
+                ticking = false;
+            });
         };
 
-        topBar?.addEventListener('touchstart', handleTouchStart, { passive: true });
-        topBar?.addEventListener('touchend', handleTouchEnd, { passive: true });
+        window.addEventListener('scroll', handleScroll, { passive: true });
 
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', handleResize);
@@ -273,8 +280,7 @@ function App() {
         handleResize();
 
         return () => {
-            topBar?.removeEventListener('touchstart', handleTouchStart);
-            topBar?.removeEventListener('touchend', handleTouchEnd);
+            window.removeEventListener('scroll', handleScroll);
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('orientationchange', handleResize);
         };

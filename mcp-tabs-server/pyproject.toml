@@ -1,0 +1,26 @@
+[project]
+name = "mcp-tabs-server"
+version = "0.1.0"
+description = "MCP server for a 593K-file guitar tab library"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.2.0",
+    "pyguitarpro>=0.10",
+    "mido>=1.3",
+    "aiosqlite>=0.20",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio"]
+
+[project.scripts]
+mcp-tabs-server = "mcp_tabs_server.server:main"
+tabs-index = "mcp_tabs_server.indexer:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_tabs_server"]
