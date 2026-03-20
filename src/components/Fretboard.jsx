@@ -55,10 +55,6 @@ const Fretboard = ({
             className={`fretboard-grid ${instrument === 'mandolin' ? 'mandolin-fretboard' : ''}`}
             style={{ gridTemplateColumns: `60px repeat(${numFrets + 1}, minmax(35px, 1fr))` }}
         >
-            {/* Single continuous nut overlay — only when fret 0 is visible */}
-            {fretStart === 0 && (
-                <div className="nut-overlay" style={{ gridColumn: 2, gridRow: `1 / ${tuning.length + 1}` }} />
-            )}
             {tuning.map((openNote, stringIndex) => {
                 const isPaired = isMandolinPaired(stringIndex);
                 const isMuted = mutedStrings?.has(stringIndex) ?? false;

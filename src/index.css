@@ -2609,14 +2609,11 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
     border-left: 5px solid var(--fret-wire);
 }
 
-/* Single continuous nut overlay — spans the full column with no per-cell gaps */
-.nut-overlay {
+/* Nut shading — only when the cell is actually fret 0 */
+.fret-cell.nut {
     background: var(--nut-bg);
     border-left: 5px solid var(--fret-wire);
     border-right: 3px solid var(--fret-wire);
-    border-radius: 2px;
-    pointer-events: none;
-    z-index: 0;
 }
 
 /* Muted strings in chord voicing mode */
@@ -3431,7 +3428,7 @@ input[type="checkbox"] {
         border-left: 4px solid var(--fret-wire);
     }
 
-    .nut-overlay {
+    .fret-cell.nut {
         border-left: 4px solid var(--fret-wire);
         border-right: 2px solid var(--fret-wire);
     }
