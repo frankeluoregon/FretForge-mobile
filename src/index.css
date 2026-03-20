@@ -2594,7 +2594,7 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
 }
 
 /* Extend string over nut */
-.fret-cell.fret-0::before {
+.fret-cell.nut::before {
     left: -5px;
 }
 
@@ -2609,10 +2609,13 @@ body:has(#fretboard-page.active) .legend .passing-note-legend {
     border-left: 5px solid var(--fret-wire);
 }
 
-.fret-cell.fret-0 {
+/* Nut shading — only when the cell is actually fret 0 */
+.fret-cell.nut {
     background: var(--nut-bg);
     border-left: 5px solid var(--fret-wire);
     border-right: 3px solid var(--fret-wire);
+    /* Inset shadow fills sub-pixel gaps between rows */
+    box-shadow: 0 -1px 0 0 var(--nut-bg), 0 1px 0 0 var(--nut-bg);
 }
 
 /* Muted strings in chord voicing mode */
@@ -3427,7 +3430,7 @@ input[type="checkbox"] {
         border-left: 4px solid var(--fret-wire);
     }
 
-    .fret-cell.fret-0 {
+    .fret-cell.nut {
         border-left: 4px solid var(--fret-wire);
         border-right: 2px solid var(--fret-wire);
     }

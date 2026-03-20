@@ -92,7 +92,7 @@ const Fretboard = ({
                             return (
                                 <div
                                     key={fret}
-                                    className={`fret-cell fret-${fretIdx} ${isPaired ? 'mandolin-paired-string' : ''} ${isMuted ? 'muted-string' : ''} ${isBarreFret ? 'barre-fret' : ''}`}
+                                    className={`fret-cell fret-${fretIdx} ${fret === 0 ? 'nut' : ''} ${isPaired ? 'mandolin-paired-string' : ''} ${isMuted ? 'muted-string' : ''} ${isBarreFret ? 'barre-fret' : ''}`}
                                     onClick={() => onNoteClick && onNoteClick(stringIndex, fret)}
                                 >
                                     {isMuted && (barFret !== null ? isBarreFret : fret === 0) && !isPaired && (
