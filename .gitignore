@@ -35,6 +35,10 @@ npm-debug.log*
 .env.local
 .env.*.local
 
+# MCP tabs server
+mcp-tabs-server/
+
 # OS files
 .DS_Store
 Thumbs.db
+nul
