@@ -247,31 +247,33 @@ function App() {
             }
         };
 
-        // Auto-hide top bar on scroll down, reveal on scroll up (Mobile only)
+        // Auto-hide menu on scroll down; pull down from top to reveal (Mobile only)
         let lastScrollY = window.scrollY;
-        let ticking = false;
+        let touchStartY = 0;
 
         const handleScroll = () => {
             if (window.innerWidth > 768) return;
-            if (ticking) return;
-            ticking = true;
-            requestAnimationFrame(() => {
-                const currentScrollY = window.scrollY;
-                const delta = currentScrollY - lastScrollY;
-                // Scroll down by 10+px → hide
-                if (delta > 10 && currentScrollY > 60) {
-                    setNavCollapsed(true);
-                }
-                // Scroll up by 10+px → show
-                if (delta < -10) {
-                    setNavCollapsed(false);
-                }
-                lastScrollY = currentScrollY;
-                ticking = false;
-            });
+            const currentScrollY = window.scrollY;
+            const delta = currentScrollY - lastScrollY;
+            // Scroll down → hide
+            if (delta > 10 && currentScrollY > 60) setNavCollapsed(true);
+            lastScrollY = currentScrollY;
+        };
+
+        const handleTouchStart = (e) => {
+            touchStartY = e.touches[0].clientY;
+        };
+
+        const handleTouchEnd = (e) => {
+            if (window.innerWidth > 768) return;
+            const deltaY = e.changedTouches[0].clientY - touchStartY;
+            // Pull down near top of screen → show collapsed menu
+            if (deltaY > 40 && touchStartY < 150) setNavCollapsed(false);
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
+        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        document.addEventListener('touchend', handleTouchEnd, { passive: true });
 
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', handleResize);
@@ -281,6 +283,8 @@ function App() {
 
         return () => {
             window.removeEventListener('scroll', handleScroll);
+            document.removeEventListener('touchstart', handleTouchStart);
+            document.removeEventListener('touchend', handleTouchEnd);
             window.removeEventListener('resize', handleResize);
             window.removeEventListener('orientationchange', handleResize);
         };
@@ -736,9 +740,6 @@ function App() {
         <div className="app-container">
             {/* Top Bar */}
             <div className={`top-bar${navCollapsed ? ' collapsed' : ''}`}>
-                <div className="top-bar-pull-tab" onClick={() => setNavCollapsed(c => !c)}>
-                    <span className="pull-tab-handle" />
-                </div>
                 <div className="top-bar-content">
                     {/* Header Row */}
                     <div className="top-bar-row">
@@ -1123,6 +1124,9 @@ function App() {
                             </button>
                         </div>
                     )}
+                </div>
+                <div className="top-bar-pull-tab" onClick={() => setNavCollapsed(c => !c)}>
+                    <span className="pull-tab-handle">{navCollapsed ? '▼ Menu' : ''}</span>
                 </div>
             </div>
 

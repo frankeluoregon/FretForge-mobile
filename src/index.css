@@ -3472,6 +3472,7 @@ input[type="checkbox"] {
     body {
         /* Android safe area padding - extra padding to clear OS status bar */
         padding-top: calc(env(safe-area-inset-top, 20px) + 160px);
+        transition: padding-top 0.3s ease;
     }
 
     /* Top bar with safe area padding - 28px to sit just below OS menu */
@@ -3479,9 +3480,9 @@ input[type="checkbox"] {
         padding-top: calc(env(safe-area-inset-top, 20px) + 28px);
     }
 
-    /* Collapsed state — slides fully off-screen, pull tab remains visible */
+    /* Collapsed state — slides off-screen, menu tab remains below system bar */
     .top-bar.collapsed {
-        transform: translateY(calc(-100% + 28px));
+        transform: translateY(calc(-100% + env(safe-area-inset-top, 20px) + 55px));
     }
 
     .top-bar.collapsed .top-bar-content {
@@ -3506,16 +3507,31 @@ input[type="checkbox"] {
         border-radius: 2px;
         background: var(--text-secondary, #888);
         opacity: 0.5;
+        font-size: 0;
+    }
+
+    /* When collapsed, show a visible menu tab */
+    .top-bar.collapsed .top-bar-pull-tab {
+        height: auto;
+        padding: 6px 0;
     }
 
     .top-bar.collapsed .pull-tab-handle {
-        opacity: 0.8;
+        width: auto;
+        height: auto;
+        background: var(--bg-header, var(--bg-panel));
+        border: 1px solid var(--border-dim);
+        border-radius: 0 0 8px 8px;
+        padding: 4px 16px;
+        opacity: 1;
+        font-size: 12px;
+        color: var(--text-secondary, #888);
+        letter-spacing: 0.5px;
     }
 
-    /* Reduce body padding when nav is collapsed (only pull tab visible) */
+    /* Reduce body padding when nav is collapsed (menu tab visible) */
     body:has(.top-bar.collapsed) {
-        padding-top: calc(env(safe-area-inset-top, 20px) + 36px);
-        transition: padding-top 0.3s ease;
+        padding-top: calc(env(safe-area-inset-top, 20px) + 63px);
     }
 
     /* Top bar container */
