@@ -4,6 +4,11 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    proxy: {
+      '/api/chopro': 'http://localhost:3001',
+    },
+  },
   plugins: [
     react(),
     VitePWA({

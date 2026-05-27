@@ -4040,3 +4040,408 @@ input[type="checkbox"] {
 .app-footer a:hover {
     text-decoration: underline;
 }
+
+/* ─── Song Mode ───────────────────────────────────────────────────────────── */
+
+.song-mode {
+    max-width: 85vw;
+    margin: 0 auto;
+    padding: calc(var(--topbar-offset, 140px) - 30px) 12px 0;
+    box-sizing: border-box;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Song Controls Bar */
+.song-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border-dim);
+    flex-shrink: 0;
+}
+
+.song-control-btn {
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    border: 1px solid var(--btn-border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
+.song-control-btn:hover {
+    background: var(--btn-hover);
+}
+
+.song-control-btn.active {
+    background: var(--btn-hover);
+    color: var(--text-accent);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.song-control-btn.library-btn {
+    background: var(--bg-panel);
+    color: var(--text-accent);
+    border-color: var(--border-bright);
+}
+
+.song-control-btn.library-btn:hover {
+    background: var(--bg-header);
+}
+
+.song-controls-top {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-top: 0;
+}
+
+.song-topline-title {
+    font-weight: bold;
+    color: var(--text-highlight);
+    font-size: 1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-topline-artist {
+    color: var(--text-accent);
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-controls-inline {
+    padding: 6px 0;
+    margin-bottom: 0;
+}
+
+.song-scroll-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.scroll-speed-slider {
+    width: 80px;
+    height: 4px;
+    accent-color: var(--btn-bg);
+    cursor: pointer;
+}
+
+.scroll-speed-slider.disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.song-transpose-controls,
+.song-font-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.transpose-label {
+    color: var(--text-main);
+    font-size: 0.85em;
+    min-width: 50px;
+    text-align: center;
+}
+
+/* Song Sheet Container */
+.song-sheet-container {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* Chord Sheet */
+.chord-sheet {
+    font-family: 'Courier New', monospace;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+
+
+
+
+/* Chord Chart — FretForge diagram grid above lyrics */
+.song-chord-chart {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 0;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border-dim);
+}
+
+.song-chord-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg-element);
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.song-chord-card:hover {
+    border-color: var(--border-bright);
+    background: var(--bg-panel);
+}
+
+.song-chord-card-name {
+    font-weight: bold;
+    font-size: 0.9em;
+    color: var(--text-accent);
+    margin-bottom: 2px;
+    white-space: nowrap;
+}
+
+.song-chord-fretboard {
+    overflow: hidden;
+    zoom: 0.5;
+}
+
+.song-chord-fretboard .fretboard-container {
+    margin: 0;
+    padding: 0;
+}
+
+
+/* Fallback: chord names only (for bass/mandolin) */
+.song-chord-names-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-dim);
+}
+
+.song-chord-name-tag {
+    background: var(--bg-element);
+    border: 1px solid var(--border-dim);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-weight: bold;
+    font-size: 0.9em;
+    color: var(--text-accent);
+}
+
+/* Chord Sheet Sections */
+.chord-sheet-section {
+    margin-bottom: 12px;
+}
+
+.section-label {
+    font-weight: bold;
+    font-style: italic;
+    color: var(--text-accent);
+    margin: 12px 0 4px;
+    font-size: 0.9em;
+}
+
+/* Chord Lines */
+.chord-line {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 2px;
+}
+
+.chord-line-blank {
+    height: 0.8em;
+}
+
+.chord-segment {
+    display: inline-flex;
+    flex-direction: column;
+    white-space: pre;
+}
+
+.chord-name {
+    color: var(--text-accent);
+    font-weight: bold;
+    font-size: 0.9em;
+    height: 1.3em;
+    line-height: 1.3em;
+}
+
+.lyric-text {
+    white-space: pre;
+}
+
+/* ─── File Browser ────────────────────────────────────────────────────────── */
+
+.file-browser {
+    margin-top: 8px;
+}
+
+.file-browser-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.file-search-input {
+    flex: 1;
+    background: var(--bg-input);
+    color: var(--text-main);
+    border: 1px solid var(--border-dim);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 1em;
+    outline: none;
+}
+
+.file-search-input:focus {
+    border-color: var(--border-focus);
+}
+
+.file-count {
+    color: var(--text-main);
+    opacity: 0.7;
+    font-size: 0.85em;
+    white-space: nowrap;
+}
+
+.file-browser-error {
+    color: #ff6b6b;
+    padding: 12px;
+    background: var(--bg-element);
+    border-radius: 4px;
+    margin-bottom: 12px;
+    font-size: 0.9em;
+}
+
+.file-browser-loading {
+    color: var(--text-main);
+    opacity: 0.7;
+    padding: 20px;
+    text-align: center;
+}
+
+.file-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.file-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-dim);
+    transition: background 0.15s;
+}
+
+.file-list-item:hover {
+    background: var(--bg-element);
+}
+
+.file-title {
+    color: var(--text-highlight);
+    font-weight: 500;
+}
+
+.file-artist {
+    color: var(--text-main);
+    opacity: 0.7;
+    font-size: 0.85em;
+    margin-left: 12px;
+    white-space: nowrap;
+}
+
+/* Letter Pagination Nav */
+.letter-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    padding: 8px 0;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-dim);
+}
+
+.letter-btn {
+    background: var(--bg-element);
+    color: var(--text-main);
+    border: 1px solid var(--border-dim);
+    border-radius: 4px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-size: 0.8em;
+    font-weight: bold;
+    min-width: 28px;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.letter-btn:hover {
+    background: var(--btn-bg);
+    color: var(--btn-text);
+}
+
+.letter-btn.active {
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    border-color: var(--border-bright);
+}
+
+/* Artist Group Headers */
+.artist-group {
+    margin-bottom: 2px;
+}
+
+.artist-group-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-dim);
+    cursor: pointer;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    user-select: none;
+}
+
+.artist-group-header:hover {
+    background: var(--bg-header);
+}
+
+.artist-group-toggle {
+    color: var(--text-main);
+    opacity: 0.6;
+    font-size: 0.85em;
+    width: 12px;
+}
+
+.artist-group-name {
+    color: var(--text-accent);
+    font-weight: bold;
+    font-size: 0.95em;
+    flex: 1;
+}
+
+.artist-group-count {
+    color: var(--text-main);
+    opacity: 0.5;
+    font-size: 0.8em;
+}
+
+.artist-group .file-list-item {
+    padding-left: 32px;
+}

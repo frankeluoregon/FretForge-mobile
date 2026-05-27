@@ -7,6 +7,7 @@ import { Progressions } from './utils/progressions';
 import Logo from './components/Logo';
 import { getPositionsForChord, getPositionAtFret, fingeringsToPositionEntries, INSTRUMENT_MAX_FRETS } from './utils/positions.js';
 import ChordDiagram from './components/ChordDiagram.jsx';
+import SongMode from './components/SongMode.jsx';
 import { getChordFingerings, STRUMMED_INSTRUMENTS } from './utils/chordsDb.js';
 import { soundingRoot } from './utils/tuningTransposer.js';
 
@@ -94,6 +95,12 @@ function App() {
     const [neckPosition, setNeckPosition] = useState(savedSettings.neckPosition ?? null);
     const [viewLayout, setViewLayout] = useState(savedSettings.viewLayout || 'single');
 
+    // Song mode state
+    const [songFile, setSongFile] = useState(savedSettings.songFile || null);
+    const [songData, setSongData] = useState(null);
+    const [songTranspose, setSongTranspose] = useState(0);
+    const [songFontSize, setSongFontSize] = useState(savedSettings.songFontSize || 16);
+
     // Alternate tuning state (guitar uses guitarTuning above; uke and mandolin get their own)
     const [ukuleleTuning, setUkuleleTuning] = useState(savedSettings.ukuleleTuning || 'standard');
     const [mandolinTuning, setMandolinTuning] = useState(savedSettings.mandolinTuning || 'standard');
@@ -134,7 +141,8 @@ function App() {
             theme, zoom, playbackMode, progKey, progQuality, selectedProgression, neckPosition, viewLayout,
             // Save current chords to the appropriate bucket, preserve the other from existing storage
             fretboardChords: mode === 'fretboard' ? chords : (savedSettings.fretboardChords || DEFAULT_CHORDS),
-            progressionChords: mode === 'progression' ? chords : (savedSettings.progressionChords || DEFAULT_CHORDS)
+            progressionChords: mode === 'progression' ? chords : (savedSettings.progressionChords || DEFAULT_CHORDS),
+            songFile, songFontSize,
         };
         
         // We need to read the latest from LS to ensure we don't overwrite the "other" mode's chords with stale data
@@ -152,7 +160,7 @@ function App() {
         localStorage.setItem('fretforge_settings', JSON.stringify(settings, replacer));
     }, [mode, instrument, guitarTuning, ukuleleTuning, mandolinTuning, capo,
         numFrets, showScaleNotes, showPassingNotes, theme, zoom, playbackMode,
-        progKey, progQuality, selectedProgression, neckPosition, viewLayout, chords]);
+        progKey, progQuality, selectedProgression, neckPosition, viewLayout, chords, songFile, songFontSize]);
 
     // Derived State
     const currentTuning = useMemo(() => {
@@ -355,17 +363,22 @@ function App() {
     const switchMode = (newMode) => {
         if (mode === newMode) return;
 
+        if (newMode === 'song') {
+            setMode(newMode);
+            return;
+        }
+
         // Load chords for the new mode from localStorage
         const saved = localStorage.getItem('fretforge_settings');
         const settings = saved ? JSON.parse(saved, reviver) : {};
-        
+
         let nextChords;
         if (newMode === 'fretboard') {
             nextChords = settings.fretboardChords || DEFAULT_CHORDS;
         } else {
             nextChords = settings.progressionChords || DEFAULT_CHORDS;
         }
-        
+
         setChords(nextChords);
         setMode(newMode);
     };
@@ -757,6 +770,10 @@ function App() {
                                 className={`mode-btn ${mode === 'progression' ? 'active' : ''}`}
                                 onClick={() => switchMode('progression')}
                             >Progression</button>
+                            <button
+                                className={`mode-btn ${mode === 'song' ? 'active' : ''}`}
+                                onClick={() => switchMode('song')}
+                            >Song</button>
                         </div>
                     </div>
 
@@ -1130,11 +1147,29 @@ function App() {
                 </div>
             </div>
 
+            {/* Song Mode */}
+            {mode === 'song' && (
+                <SongMode
+                    songData={songData}
+                    setSongData={setSongData}
+                    songFile={songFile}
+                    setSongFile={setSongFile}
+                    transpose={songTranspose}
+                    setTranspose={setSongTranspose}
+                    fontSize={songFontSize}
+                    setFontSize={setSongFontSize}
+                    instrument={instrument}
+                    currentTuning={currentTuning}
+                    capo={capo}
+                    neckPosition={neckPosition}
+                />
+            )}
+
             {/* Main Content */}
-            <div 
-                className="page-content active" 
-                style={{ 
-                    transform: `scale(${zoom / 100})`, 
+            {mode !== 'song' && <div
+                className="page-content active"
+                style={{
+                    transform: `scale(${zoom / 100})`,
                     transformOrigin: 'top center',
                     marginTop: '20px'
                 }}
@@ -1312,7 +1347,7 @@ function App() {
                         </button>
                     )}
                 </div>
-            </div>
+            </div>}
             <footer className="app-footer">
                 &copy; 2026 <a href="https://canvasback.us" target="_blank" rel="noopener noreferrer">Canvasback Solutions</a>
             </footer>
